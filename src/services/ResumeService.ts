@@ -1,6 +1,7 @@
 import { Resume } from '@/interfaces/Resume'
 import { ResumeRepository } from '@/interfaces/ResumeRepository'
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import crypto from 'crypto'
 
 export class ResumeService {
@@ -50,7 +51,8 @@ export class ResumeService {
                 resumeId,
                 providedResume.name,
                 providedResume.textContent,
-                ownerId
+                ownerId,
+                file.lastModified
             )
 
             return newResume
@@ -77,6 +79,30 @@ export class ResumeService {
         } catch (error) {
             console.error(`ResumeService failed to retrieve resumes: ${error}`)
             throw new Error('ResumeService failed to retrieve resumes')
+        }
+    }
+
+    async getPresignedUrl(resumeId: string, userId: string): Promise<string> {
+        if (!resumeId) {
+            throw new Error('No resumeId provided')
+        }
+
+        try {
+            const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Key: resumeId,
+            }
+
+            const resume = await this.resumes.getResumeById(resumeId, userId)
+
+            if (!resume) {
+                throw new Error('No resume found with the provided id')
+            }
+
+            return await getSignedUrl(this.s3Client, new GetObjectCommand(params), { expiresIn: 3600 })
+        } catch (error) {
+            console.error(`ResumeService failed to retrieve a presigned url: ${error}`)
+            throw new Error('ResumeService failed to retrieve a presigned url')
         }
     }
 }

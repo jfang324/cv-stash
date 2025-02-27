@@ -29,6 +29,10 @@ const resumeSchema: Schema<ResumeDocument> = new Schema(
             type: String,
             required: [true, 'All resumes need an owner Id'],
         },
+        lastModified: {
+            type: Number,
+            required: [true, 'All resumes need a last modified date'],
+        },
     },
     { collection: 'Resumes' }
 )
@@ -45,7 +49,8 @@ function mapResumeDocumentToResume(resumeDocument: ResumeDocument): Resume {
         !resumeDocument.id ||
         !resumeDocument.name ||
         !resumeDocument.textContent ||
-        !resumeDocument.ownerId
+        !resumeDocument.ownerId ||
+        resumeDocument.lastModified === null
     ) {
         throw new Error('Invalid Resume Document')
     }
@@ -54,6 +59,7 @@ function mapResumeDocumentToResume(resumeDocument: ResumeDocument): Resume {
         id: resumeDocument.id,
         name: resumeDocument.name,
         textContent: resumeDocument.textContent,
+        lastModified: resumeDocument.lastModified,
     }
 }
 
@@ -95,16 +101,43 @@ export class MongoResumeRepository implements ResumeRepository {
      * @param ownerId - The id of the user/owner of the resume
      * @returns The resume object created
      */
-    async createResume(id: string, name: string, textContent: string, ownerId: string): Promise<Resume> {
+    async createResume(
+        id: string,
+        name: string,
+        textContent: string,
+        ownerId: string,
+        lastModified: number
+    ): Promise<Resume> {
         const resumeModel = ResumeModel(this.connection)
 
         try {
-            const resume = await resumeModel.create({ id, name, textContent, ownerId })
+            const resume = await resumeModel.create({ id, name, textContent, ownerId, lastModified })
 
             return mapResumeDocumentToResume(resume)
         } catch (error) {
             console.error(`ResumeRepository failed to create a new resume: ${error}`)
             throw new Error('ResumeRepository failed to create a new resume')
+        }
+    }
+
+    async getResumeById(resumeId: string, userId: string): Promise<Resume | null> {
+        const resumeModel = ResumeModel(this.connection)
+
+        try {
+            const resume = await resumeModel.findOne({ id: resumeId })
+
+            if (resume.ownerId !== userId) {
+                throw new Error('user does not own this resume')
+            }
+
+            if (!resume) {
+                return null
+            }
+
+            return mapResumeDocumentToResume(resume)
+        } catch (error) {
+            console.error(`ResumeRepository failed to retrieve a resume by id: ${error}`)
+            throw new Error('ResumeRepository failed to retrieve a resume by id')
         }
     }
 }

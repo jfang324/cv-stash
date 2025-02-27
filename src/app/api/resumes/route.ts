@@ -19,10 +19,15 @@ export async function POST(request: NextRequest) {
 
         const formData = await request.formData()
         const resumeFile = formData.get('file')
+        const resumeName = formData.get('name')
         const textContent = formData.get('text')
 
         if (!resumeFile || !(resumeFile instanceof File)) {
             return NextResponse.json({ error: 'No PDF provided' }, { status: 400 })
+        }
+
+        if (!resumeName) {
+            return NextResponse.json({ error: 'No resume name provided' }, { status: 400 })
         }
 
         if (!textContent) {
@@ -35,7 +40,7 @@ export async function POST(request: NextRequest) {
         const resumeService = new ResumeService(resumeRepository, s3Client)
 
         const newResume = await resumeService.createResume(
-            { name: 'McDonalds Resume', textContent: textContent as string },
+            { name: resumeName as string, textContent: textContent as string },
             user.sub,
             resumeFile
         )

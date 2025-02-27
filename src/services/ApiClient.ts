@@ -19,13 +19,17 @@ export class ApiClient {
         return response.data
     }
 
-    async uploadResume(resume: File, textContent: string): Promise<Resume> {
+    async uploadResume(resume: File, resumeName: string, textContent: string): Promise<Resume> {
         if (!resume) {
             throw new Error('No resume provided')
+        }
+        if (!resumeName) {
+            throw new Error('No resume name provided')
         }
 
         const formData = new FormData()
         formData.append('file', resume)
+        formData.append('name', resumeName)
         formData.append('text', textContent)
 
         const response = await this.httpClient.post('/api/resumes', formData)
@@ -37,5 +41,11 @@ export class ApiClient {
         const response = await this.httpClient.get('/api/resumes')
 
         return response.data
+    }
+
+    async retrievePresignedUrl(resumeId: string): Promise<string> {
+        const response = await this.httpClient.get(`/api/resumes/${resumeId}`)
+
+        return response.data.url
     }
 }

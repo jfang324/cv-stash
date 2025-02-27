@@ -1,3 +1,4 @@
+import { SearchIndexProvider } from '@/components/SearchIndexProvider'
 import { Toaster } from '@/components/ui/toaster'
 import { Auth0Provider } from '@auth0/nextjs-auth0'
 import type { Metadata } from 'next'
@@ -27,10 +28,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <Auth0Provider>
-                <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                    {children}
-                    <Toaster />
-                </body>
+                <SearchIndexProvider>
+                    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+                        {children}
+                        <Toaster />
+                    </body>
+                </SearchIndexProvider>
             </Auth0Provider>
         </html>
     )
