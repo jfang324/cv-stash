@@ -19,7 +19,7 @@ export class UserService {
      */
     async createIfNewUser(providedUser: Partial<User>): Promise<User> {
         if (!providedUser || !providedUser.id || !providedUser.name || !providedUser.email) {
-            throw new Error('UserService failed to retrieve user credentials')
+            throw new Error('Insufficient information to create new user')
         }
 
         const userCredentials = await this.users.getUserById(providedUser.id)
@@ -34,7 +34,7 @@ export class UserService {
 
                 return newUserCredentials
             } catch (error) {
-                console.error(`Error creating new user:: ${error}`)
+                console.error(`UserService failed to create a new user: ${error}`)
                 throw new Error('UserService failed to create a new user')
             }
         }

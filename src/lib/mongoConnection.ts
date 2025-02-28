@@ -15,7 +15,7 @@ if (!cached) {
 /**
  * Create a connection to the database if it doesn't exist
  */
-const connectToDb = async () => {
+const connectToDb = async (): Promise<mongoose.Connection> => {
     if (cached.connection) {
         return cached.connection
     }
@@ -23,7 +23,7 @@ const connectToDb = async () => {
     try {
         cached.connection = await mongoose.connect(DATABASE_URL)
     } catch (error) {
-        console.error('Database connection error:', error)
+        console.error(`Failed to connect to the database: ${error}`)
         throw new Error('Failed to connect to the database')
     }
 

@@ -1,6 +1,6 @@
 export interface Resume {
     id: string
     name: string
-    content: string
-    ownerId: string
+    textContent: string
+    lastModified: number
 }
