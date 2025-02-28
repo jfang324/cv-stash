@@ -99,6 +99,7 @@ export class MongoResumeRepository implements ResumeRepository {
      * @param name - The resume name
      * @param textContent - The text content of the resume
      * @param ownerId - The id of the user/owner of the resume
+     * @param lastModified - A number representing the last modified time of the resume
      * @returns The resume object created
      */
     async createResume(
@@ -120,18 +121,24 @@ export class MongoResumeRepository implements ResumeRepository {
         }
     }
 
+    /**
+     * Gets a resume by id but only if the user owns it
+     * @param resumeId - The id of the resume
+     * @param userId - The id of the user
+     * @returns The resume object or null if it doesn't exist
+     */
     async getResumeById(resumeId: string, userId: string): Promise<Resume | null> {
         const resumeModel = ResumeModel(this.connection)
 
         try {
             const resume = await resumeModel.findOne({ id: resumeId })
 
-            if (resume.ownerId !== userId) {
-                throw new Error('user does not own this resume')
-            }
-
             if (!resume) {
                 return null
+            }
+
+            if (resume.ownerId !== userId) {
+                throw new Error('User does not own this resume')
             }
 
             return mapResumeDocumentToResume(resume)

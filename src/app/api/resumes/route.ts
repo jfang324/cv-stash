@@ -69,9 +69,9 @@ export async function GET(request: NextRequest) {
         const s3Client = getS3Client()
         const resumeService = new ResumeService(resumeRepository, s3Client)
 
-        const resumes = await resumeService.getResumesByOwnerId(user.sub)
+        const userResumes = await resumeService.getResumesByOwnerId(user.sub)
 
-        return NextResponse.json(resumes, { status: 200 })
+        return NextResponse.json(userResumes, { status: 200 })
     } catch (error: any) {
         console.error('Error retrieving resumes::', error.message || error)
         return NextResponse.json({ error: error.message || 'Error retrieving resumes' }, { status: 500 })

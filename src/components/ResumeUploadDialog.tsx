@@ -45,7 +45,8 @@ export const ResumeUploadDialog = () => {
     }
 
     /**
-     * Sends a POST request with the file attached
+     * Uploads the current file to the server and creates a new resume
+     * @returns
      */
     const handleFileUpload = async () => {
         if (!file) {
@@ -77,8 +78,8 @@ export const ResumeUploadDialog = () => {
             <DialogTrigger asChild>
                 <Button>Upload a New Resume</Button>
             </DialogTrigger>
-            <DialogContent className="flex flex-col justify-center items-center px-10 gap-3">
-                <DialogTitle>Upload a New Resume</DialogTitle>
+            <DialogContent className="flex flex-col justify-center items-center gap-2 sm:px-10">
+                <DialogTitle className="pb-1">Upload a New Resume</DialogTitle>
                 <div
                     onClick={() => {
                         const secretInput = document.getElementById('secretInput')
@@ -90,16 +91,17 @@ export const ResumeUploadDialog = () => {
                         <Page pageNumber={1} scale={0.7} />
                     </Document>
                 </div>
-                <Input
-                    className={`border border-black ${file ? '' : 'hidden'}`}
-                    placeholder="Enter a resume name"
-                    onChange={(e) => setResumeName(e.target.value)}
-                    defaultValue={resumeName}
-                />
-                <Button className={`w-full ${file ? '' : 'hidden'}`} onClick={handleFileUpload}>
-                    Upload
-                </Button>
-
+                {file && (
+                    <div className="flex flex-col gap-1.5 w-full">
+                        <Input
+                            className="border border-black"
+                            placeholder="Enter a resume name"
+                            onChange={(e) => setResumeName(e.target.value)}
+                            defaultValue={resumeName}
+                        />
+                        <Button onClick={handleFileUpload}>Upload</Button>
+                    </div>
+                )}
                 <input type="file" id="secretInput" className="hidden" onChange={handleFileChange} />
             </DialogContent>
         </Dialog>

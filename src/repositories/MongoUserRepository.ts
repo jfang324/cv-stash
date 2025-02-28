@@ -60,7 +60,7 @@ export class MongoUserRepository implements UserRepository {
 
     /**
      * Gets user by id
-     * @param id - The auth0 id of the user
+     * @param id - The id of the user
      * @returns The user object or null if they don't exist
      */
     async getUserById(id: string): Promise<User | null> {

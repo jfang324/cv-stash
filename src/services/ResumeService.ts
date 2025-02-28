@@ -82,6 +82,12 @@ export class ResumeService {
         }
     }
 
+    /**
+     * Creates a presigned for the requested resume
+     * @param resumeId - The id of the resume
+     * @param userId - The id of the user
+     * @returns A presigned url for the resume
+     */
     async getPresignedUrl(resumeId: string, userId: string): Promise<string> {
         if (!resumeId) {
             throw new Error('No resumeId provided')

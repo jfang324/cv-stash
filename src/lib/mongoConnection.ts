@@ -15,7 +15,7 @@ if (!cached) {
 /**
  * Create a connection to the database if it doesn't exist
  */
-const connectToDb = async () => {
+const connectToDb = async (): Promise<mongoose.Connection> => {
     if (cached.connection) {
         return cached.connection
     }

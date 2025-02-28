@@ -1,10 +1,10 @@
 import { S3Client } from '@aws-sdk/client-s3'
 
-const bucketRegion = process.env.BUCKET_REGION || ''
-const accessKey = process.env.ACCESS_KEY || ''
-const secretAccessKey = process.env.SECRET_ACCESS_KEY || ''
+const BUCKET_REGION: string = process.env.BUCKET_REGION || ''
+const ACCESS_KEY: string = process.env.ACCESS_KEY || ''
+const SECRET_ACCESS_KEY: string = process.env.SECRET_ACCESS_KEY || ''
 
-if (!bucketRegion || !accessKey || !secretAccessKey) {
+if (!BUCKET_REGION || !ACCESS_KEY || !SECRET_ACCESS_KEY) {
     throw new Error('AWS credentials or bucket region is not set')
 }
 
@@ -24,14 +24,14 @@ const getS3Client = (): S3Client => {
 
     try {
         cached.client = new S3Client({
-            region: bucketRegion,
+            region: BUCKET_REGION,
             credentials: {
-                accessKeyId: accessKey,
-                secretAccessKey: secretAccessKey,
+                accessKeyId: ACCESS_KEY,
+                secretAccessKey: SECRET_ACCESS_KEY,
             },
         })
     } catch (error) {
-        console.error('Error creating S3 client:', error)
+        console.error(`Failed to create S3 client: ${error}`)
         throw new Error('Failed to create S3 client')
     }
 

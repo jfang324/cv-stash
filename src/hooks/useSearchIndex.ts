@@ -1,7 +1,7 @@
-import { SearchIndexContext } from '@/components/SearchIndexProvider'
+import { SearchIndexContext, SearchIndexContextType } from '@/components/SearchIndexProvider'
 import { useContext } from 'react'
 
-export const useSearchIndex = () => {
+export const useSearchIndex = (): SearchIndexContextType => {
     const searchIndexContext = useContext(SearchIndexContext)
 
     if (!searchIndexContext) {

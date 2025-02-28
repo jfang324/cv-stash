@@ -33,14 +33,31 @@ export const MainApp = () => {
         initializeUser()
     }, [user, isLoading, toast, apiClient])
 
+    /**
+     * Searches the index for the query and sets the results
+     */
     const handleSearch = () => {
-        const results = searchIndex(query)
-        setResults(results.splice(0, 10))
+        try {
+            const searchResults = searchIndex(query)
+            setResults(searchResults)
+        } catch (error) {
+            console.error(error)
+            toast({ title: 'Error', description: 'Failed to search index' })
+        }
     }
 
+    /**
+     * Retrieves the preSignedUrl for the resume and opens it in a new tab
+     * @param resume - the Resume object to download
+     */
     const handleDownload = async (resume: Resume) => {
-        const presignedUrl = await apiClient.retrievePresignedUrl(resume.id)
-        window.open(presignedUrl, '_blank')
+        try {
+            const presignedUrl = await apiClient.retrievePresignedUrl(resume.id)
+            window.open(presignedUrl, '_blank')
+        } catch (error) {
+            console.error(error)
+            toast({ title: 'Error', description: 'Failed to retrieve presigned url' })
+        }
     }
 
     return (
