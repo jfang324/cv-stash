@@ -80,6 +80,7 @@ export const ResumeUploadDialog = () => {
             </DialogTrigger>
             <DialogContent className="flex flex-col justify-center items-center gap-2 sm:px-10">
                 <DialogTitle className="pb-1">Upload a New Resume</DialogTitle>
+
                 <div
                     onClick={() => {
                         const secretInput = document.getElementById('secretInput')

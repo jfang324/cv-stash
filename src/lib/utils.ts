@@ -34,6 +34,7 @@ const extractTextFromPdf = async (pdf: any): Promise<string> => {
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
         const page = await pdf.getPage(pageNumber)
         const textContent = await page.getTextContent()
+
         const pageText = textContent.items.map((item: any) => item.str).join(' ')
 
         // Clean up the text:

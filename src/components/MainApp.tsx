@@ -19,6 +19,7 @@ export const MainApp = () => {
     const [query, setQuery] = useState<string>('')
     const [results, setResults] = useState<Resume[]>([])
 
+
     useEffect(() => {
         const initializeUser = async () => {
             if (!isLoading && user) {
