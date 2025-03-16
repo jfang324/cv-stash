@@ -12,7 +12,7 @@ interface SearchIndexProviderProps {
 export interface SearchIndexContextType {
     addToIndex: (resume: Resume) => void
     removeFromIndex: (resume: Resume) => void
-    searchIndex: (query: string) => Resume[]
+    searchIndex: (query: string, numResults: number) => Resume[]
 }
 
 export const SearchIndexContext = createContext<SearchIndexContextType | null>(null)
@@ -35,7 +35,6 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
             if (!isLoading && user) {
                 try {
                     const resumes = await apiClient.retrieveResumes()
-
                     setIndex(
                         new Fuse(resumes, {
                             keys: ['textContent'],
@@ -86,10 +85,11 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
     /**
      * Queries the search index and returns the results
      * @param query - the query to search for
+     * @param numResults - the number of results to return
      * @returns the results of the search
      */
     const searchIndex = useCallback(
-        (query: string): Resume[] => {
+        (query: string, numResults: number = 5): Resume[] => {
             const cleanedQuery = query
                 .split(/(?:\. |, |\n)/)
                 .map((line) => {
@@ -101,7 +101,7 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
                     }
                 })
                 .filter((line) => line.textContent.length > 0)
-            const results = index.search({ $or: cleanedQuery }, { limit: 10 })
+            const results = index.search({ $or: cleanedQuery }, { limit: numResults })
 
             return results.map((result) => result.item)
         },

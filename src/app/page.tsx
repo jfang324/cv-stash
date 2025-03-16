@@ -1,43 +1,59 @@
-'use client'
-import { MainApp } from '@/components/MainApp'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@auth0/nextjs-auth0'
-import { useEffect } from 'react'
-import { pdfjs } from 'react-pdf'
+import { SOCIAL_LINKS } from '@/constants'
+import { FileText, Github, LogIn } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
-export default function Home() {
-    const { user, isLoading } = useUser()
+const ImageCarousel = dynamic(() => import('@/components/ImageCarousel').then((mod) => mod.ImageCarousel))
 
-    useEffect(() => {
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
-    }, [])
-
-    //if the user credentials are loading display that
-    if (isLoading) return <div>Loading...</div>
-
-    //if the user is not authenticated display a login page
-    if (!user) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-4xl font-bold">Welcome to CV Stash</h1>
-                    <p className="text-lg">Please log in to continue</p>
-                    <div className="flex flex-col items-center justify-center gap-1">
-                        <Button
-                            onClick={() => {
-                                window.location.href = '/auth/login'
-                            }}
-                        >
-                            Log In
-                        </Button>
-                        <Button onClick={() => (window.location.href = 'https://github.com/jfang324/cv-stash')}>
-                            GitHub
-                        </Button>
+export default function HomePage() {
+    return (
+        <div className="h-full w-full items-center justify-center">
+            <section className="w-full py-16 sm:py-48">
+                <div className="container mx-auto px-4 sm:px-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <FileText className="h-8 w-8" />
+                        <span className="text-2xl font-bold">CV Stash</span>
+                    </div>
+                    <div className="flex flex-row gap-6 flex-wrap">
+                        <div className="flex flex-col gap-6 sm:gap-12">
+                            <div className="space-y-2 max-w-[600px]">
+                                <h1 className="text-3xl font-bold tracking-tighter sm:text-6xl">
+                                    Manage Your Resumes & Job Applications in One Place
+                                </h1>
+                                <p className="text-muted-foreground sm:text-xl">
+                                    CV Stash helps you organize your resumes, track job applications, and land your
+                                    dream job faster
+                                </p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <Button size="lg" asChild>
+                                    <Link href="/dashboard">
+                                        Get Started
+                                        <LogIn className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                                <Button size="lg" variant="outline" className="border border-black" asChild>
+                                    <Link href={SOCIAL_LINKS.github} target="_blank">
+                                        GitHub
+                                        <Github className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="flex-1 hidden sm:block px-16">
+                            <ImageCarousel
+                                images={[
+                                    '/images/temp-1.webp',
+                                    '/images/temp-2.webp',
+                                    '/images/temp-3.webp',
+                                    '/images/temp-4.webp',
+                                ]}
+                            />
+                        </div>
                     </div>
                 </div>
-            </div>
-        )
-    }
-
-    return <MainApp />
+            </section>
+        </div>
+    )
 }
