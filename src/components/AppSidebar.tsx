@@ -106,10 +106,10 @@ export const AppSidebar = () => {
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                                 <Button variant="outline" asChild>
-                                    <Link href="/auth/login?returnTo=/dashboard">
+                                    <a href="/auth/login?returnTo=/dashboard">
                                         Login
                                         <LogIn className="ml-2 h-4 w-4" />
-                                    </Link>
+                                    </a>
                                 </Button>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -146,10 +146,10 @@ export const AppSidebar = () => {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/auth/logout" className="hover:cursor-pointer">
+                                        <a href="/auth/logout" className="hover:cursor-pointer">
                                             <LogOut className="mr-2 h-4 w-4" />
                                             <span>Log out</span>
-                                        </Link>
+                                        </a>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
