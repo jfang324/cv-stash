@@ -13,32 +13,41 @@ export class UserService {
     }
 
     /**
-     * Creates a user that matches the id of the provided user, if that user doesn't exist it creates one
-     * @param providedUser - A partial user, used to create an object if it doesn't exist already
-     * @returns The user object matching the provided credentials
+     * Create a new user if they don't exist, otherwise return the existing user
+     * @param user - The user object to create or retrieve
+     * @returns The created or retrieved user object
      */
-    async createIfNewUser(providedUser: Partial<User>): Promise<User> {
-        if (!providedUser || !providedUser.id || !providedUser.name || !providedUser.email) {
-            throw new Error('Insufficient information to create new user')
-        }
+    async createIfNewUser(user: User): Promise<User> {
+        const userMetadata = await this.users.getUserById(user.id)
 
-        const userCredentials = await this.users.getUserById(providedUser.id)
-
-        if (!userCredentials) {
+        if (!userMetadata) {
             try {
-                const newUserCredentials = await this.users.createUser(
-                    providedUser.id,
-                    providedUser.name,
-                    providedUser.email
-                )
+                const newUserMetadata = await this.users.createUser(user)
 
-                return newUserCredentials
+                return newUserMetadata
             } catch (error) {
                 console.error(`UserService failed to create a new user: ${error}`)
                 throw new Error('UserService failed to create a new user')
             }
         }
 
-        return userCredentials
+        return userMetadata
+    }
+
+    /**
+     * Update a user in the database
+     * @param id - The ID of the user to update
+     * @param updatedFields - The updated fields of the user
+     * @returns The updated user object
+     */
+    async updateUser(id: string, updatedFields: Partial<User>): Promise<User> {
+        try {
+            const updatedUser = await this.users.updateUserById(id, updatedFields)
+
+            return updatedUser
+        } catch (error) {
+            console.error(`UserService failed to update user: ${error}`)
+            throw new Error('UserService failed to update user')
+        }
     }
 }

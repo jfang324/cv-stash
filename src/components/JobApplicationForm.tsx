@@ -4,10 +4,13 @@ import { ResumeSelectionStage } from '@/components/job-application-stages/Resume
 import { SummaryStage } from '@/components/job-application-stages/SummaryStage'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
+import { JobApplication } from '@/interfaces/JobApplication'
 import { JobApplicationFormFields } from '@/interfaces/JobApplicationFormFields'
 import { Resume } from '@/interfaces/Resume'
+import { ApiClient } from '@/services/ApiClient'
 import { Briefcase, CheckCircle, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 export const JobApplicationForm = () => {
     const [stage, setStage] = useState<number>(1)
@@ -17,6 +20,8 @@ export const JobApplicationForm = () => {
         jobDescription: '',
         resume: null,
     })
+    const apiClient = useMemo(() => new ApiClient(), [])
+    const { toast } = useToast()
 
     /**
      * Generic function for updating form data
@@ -71,16 +76,30 @@ export const JobApplicationForm = () => {
         setFormData((prev) => ({ ...prev, resume: selectedResume }))
     }
 
-    const handleSubmit = () => {
-        console.log('submitting!')
+    /**
+     * Handles form submission
+     */
+    const handleSubmit = async () => {
+        if (!formData || !formData.jobTitle || !formData.companyName || !formData.jobDescription || !formData.resume) {
+            toast({ title: 'Error', description: 'Please fill out all fields' })
+            return
+        }
 
-        setStage(1)
-        setFormData({
-            jobTitle: '',
-            companyName: '',
-            jobDescription: '',
-            resume: null,
-        })
+        try {
+            await apiClient.createJobApplication(formData as Omit<JobApplication, 'id' | 'lastModified'>)
+
+            setStage(1)
+            setFormData({
+                jobTitle: '',
+                companyName: '',
+                jobDescription: '',
+                resume: null,
+            })
+            toast({ title: 'Success', description: 'Your application has been submitted' })
+        } catch (error) {
+            console.error(error)
+            toast({ title: 'Error', description: 'There was an error submitting your application' })
+        }
     }
 
     // Additional information about each stage

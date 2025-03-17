@@ -17,7 +17,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { useUser } from '@auth0/nextjs-auth0'
+import { useUserMetadata } from '@/hooks/useUserMetadata'
 import {
     Briefcase,
     ChevronDown,
@@ -34,7 +34,7 @@ import { usePathname } from 'next/navigation'
 
 export const AppSidebar = () => {
     const pathname = usePathname()
-    const { user } = useUser()
+    const { user } = useUserMetadata()
 
     const navItems = [
         {
@@ -49,7 +49,7 @@ export const AppSidebar = () => {
         },
         {
             title: 'Job Applications',
-            href: '/applications',
+            href: '/job-applications',
             icon: Briefcase,
         },
         {
@@ -125,11 +125,11 @@ export const AppSidebar = () => {
                                 <DropdownMenuTrigger asChild>
                                     <SidebarMenuButton>
                                         <Avatar className="h-6 w-6 mr-2 border">
-                                            <AvatarImage src={user.picture} alt="User" />
+                                            <AvatarImage src={user.profilePicture} alt="User" />
                                             <AvatarFallback>JD</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col text-left">
-                                            <span className="text-sm">{user.name}</span>
+                                            <span className="text-sm">{`${user.firstName} ${user.lastName}`}</span>
                                             <span className="text-xs text-muted-foreground">{user.email}</span>
                                         </div>
                                         <ChevronDown className="ml-auto h-4 w-4" />

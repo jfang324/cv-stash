@@ -1,30 +1,36 @@
-import { auth0 } from '@/lib/auth0'
-import connectToDb from '@/lib/mongoConnection'
-import { MongoUserRepository } from '@/repositories/MongoUserRepository'
-import { UserService } from '@/services/UserService'
+import { getUserService, handleError, validateSessionAndGetUser } from '@/lib/apiUtils'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await auth0.getSession()
-        if (!session) {
-            return NextResponse.json({ error: 'not authenticated', status: 401 })
-        }
+        const user = await validateSessionAndGetUser(['sub', 'picture', 'email'])
+        const userService = await getUserService()
 
-        const user = session.user
-        if (!user || !user.sub || !user.name || !user.email) {
-            return NextResponse.json({ error: 'Invalid user details' }, { status: 422 })
-        }
-
-        const connection = await connectToDb()
-        const userRepository = new MongoUserRepository(connection)
-        const userService = new UserService(userRepository)
-
-        const accountDetails = await userService.createIfNewUser({ id: user.sub, name: user.name, email: user.email })
+        const accountDetails = await userService.createIfNewUser({
+            id: user.sub,
+            profilePicture: user.picture!,
+            firstName: 'John',
+            lastName: 'Doe',
+            email: user.email!,
+            notifications: false,
+        })
 
         return NextResponse.json(accountDetails, { status: 200 })
     } catch (error: any) {
-        console.error('Error creating user::', error.message || error)
-        return NextResponse.json({ error: error.message || 'Error creating user' }, { status: 500 })
+        return handleError(error)
+    }
+}
+
+export async function PUT(request: NextRequest) {
+    try {
+        const user = await validateSessionAndGetUser(['sub'])
+        const userService = await getUserService()
+        const body = await request.json()
+
+        const accountDetails = await userService.updateUser(user.sub, { ...body })
+
+        return NextResponse.json(accountDetails, { status: 200 })
+    } catch (error: any) {
+        return handleError(error)
     }
 }

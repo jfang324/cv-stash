@@ -42,27 +42,6 @@ function ResumeModel(connection: mongoose.Connection) {
     return mongoose.models.Resume || connection.model<ResumeDocument>('Resume', resumeSchema)
 }
 
-//maps a document to an object
-function mapResumeDocumentToResume(resumeDocument: ResumeDocument): Resume {
-    if (
-        !resumeDocument ||
-        !resumeDocument.id ||
-        !resumeDocument.name ||
-        !resumeDocument.textContent ||
-        !resumeDocument.ownerId ||
-        resumeDocument.lastModified === null
-    ) {
-        throw new Error('Invalid Resume Document')
-    }
-
-    return {
-        id: resumeDocument.id,
-        name: resumeDocument.name,
-        textContent: resumeDocument.textContent,
-        lastModified: resumeDocument.lastModified,
-    }
-}
-
 //ResumeRepository implemented with mongoose
 export class MongoResumeRepository implements ResumeRepository {
     private connection: mongoose.Connection
@@ -84,9 +63,9 @@ export class MongoResumeRepository implements ResumeRepository {
         const resumeModel = ResumeModel(this.connection)
 
         try {
-            const resumes = await resumeModel.find({ ownerId })
+            const resumes = await resumeModel.find({ ownerId }).lean<Resume[]>().select('-_id -__v -ownerId')
 
-            return resumes.map((resume) => mapResumeDocumentToResume(resume))
+            return resumes
         } catch (error) {
             console.error(`ResumeRepository failed to retrieve resumes by owner ID: ${error}`)
             throw new Error('ResumeRepository failed to retrieve resumes by owner ID')
@@ -94,27 +73,20 @@ export class MongoResumeRepository implements ResumeRepository {
     }
 
     /**
-     * Creates a resume in the database with the given parameters
-     * @param id - The id of the resume
-     * @param name - The resume name
-     * @param textContent - The text content of the resume
+     * Creates a resume in the database
      * @param ownerId - The id of the user/owner of the resume
-     * @param lastModified - A number representing the last modified time of the resume
-     * @returns The resume object created
+     * @param resume - The resume object to create
+     * @returns
      */
-    async createResume(
-        id: string,
-        name: string,
-        textContent: string,
-        ownerId: string,
-        lastModified: number
-    ): Promise<Resume> {
+    async createResume(ownerId: string, resume: Resume): Promise<Resume> {
         const resumeModel = ResumeModel(this.connection)
 
         try {
-            const resume = await resumeModel.create({ id, name, textContent, ownerId, lastModified })
+            const newResume = (await resumeModel.create({ ...resume, ownerId })).toObject({
+                select: ['-_id -__v'],
+            })
 
-            return mapResumeDocumentToResume(resume)
+            return newResume
         } catch (error) {
             console.error(`ResumeRepository failed to create a new resume: ${error}`)
             throw new Error('ResumeRepository failed to create a new resume')
@@ -122,29 +94,38 @@ export class MongoResumeRepository implements ResumeRepository {
     }
 
     /**
-     * Gets a resume by id but only if the user owns it
-     * @param resumeId - The id of the resume
-     * @param userId - The id of the user
+     * Gets a resume by id
+     * @param id - The id of the resume
      * @returns The resume object or null if it doesn't exist
      */
-    async getResumeById(resumeId: string, userId: string): Promise<Resume | null> {
+    async getResumeById(id: string): Promise<Resume | null> {
         const resumeModel = ResumeModel(this.connection)
 
         try {
-            const resume = await resumeModel.findOne({ id: resumeId })
+            const resume = await resumeModel.findOne({ id }).lean<Resume>().select('-_id -__v -ownerId')
 
-            if (!resume) {
-                return null
-            }
-
-            if (resume.ownerId !== userId) {
-                throw new Error('User does not own this resume')
-            }
-
-            return mapResumeDocumentToResume(resume)
+            return resume || null
         } catch (error) {
             console.error(`ResumeRepository failed to retrieve a resume by id: ${error}`)
             throw new Error('ResumeRepository failed to retrieve a resume by id')
+        }
+    }
+
+    /**
+     * Gets the ownerId of a resume
+     * @param resume - The resume object
+     * @returns The ownerId of the resume
+     */
+    async getOwnerId(resume: Resume): Promise<string> {
+        const resumeModel = ResumeModel(this.connection)
+
+        try {
+            const resumeDocument = await resumeModel.findOne({ id: resume.id }).select('-_id -__v')
+
+            return resumeDocument.ownerId
+        } catch (error) {
+            console.error(`ResumeRepository failed to retrieve ownerId: ${error}`)
+            throw new Error('ResumeRepository failed to retrieve ownerId')
         }
     }
 }

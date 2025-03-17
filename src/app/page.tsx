@@ -44,10 +44,9 @@ export default function HomePage() {
                         <div className="flex-1 hidden sm:block px-16">
                             <ImageCarousel
                                 images={[
-                                    '/images/temp-1.webp',
-                                    '/images/temp-2.webp',
-                                    '/images/temp-3.webp',
-                                    '/images/temp-4.webp',
+                                    '/images/job-details-stage.webp',
+                                    '/images/resume-selection-stage.webp',
+                                    '/images/job-application-summary-stage.webp',
                                 ]}
                             />
                         </div>
