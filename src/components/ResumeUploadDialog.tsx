@@ -1,22 +1,38 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useSearchIndex } from '@/hooks/useSearchIndex'
+import { Resume } from '@/interfaces/Resume'
 import { parsePdf } from '@/lib/utils'
 import { ApiClient } from '@/services/ApiClient'
-import { useMemo, useState } from 'react'
+import { Upload } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
 import { Document, Page } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-export const ResumeUploadDialog = () => {
+interface ResumeUploadDialogProps {
+    callBack: (resume: Resume) => void
+}
+
+export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
     const [file, setFile] = useState<File | undefined>()
     const [resumeName, setResumeName] = useState<string>()
     const apiClient = useMemo(() => new ApiClient(), [])
     const { toast } = useToast()
     const { addToIndex } = useSearchIndex()
+
+    const secretInputRef = useRef<HTMLInputElement>(null)
 
     /**
      * Updates the file if the user selects a different file
@@ -66,6 +82,7 @@ export const ResumeUploadDialog = () => {
             if (response) {
                 addToIndex(response)
                 toast({ title: 'Success', description: 'Resume uploaded successfully' })
+                callBack(response)
             }
         } catch (error) {
             console.error(error)
@@ -76,23 +93,40 @@ export const ResumeUploadDialog = () => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>Upload a New Resume</Button>
+                <Button variant={'outline'} className="w-full">
+                    <Upload className="h-3.5 w-3.5 mr-1" />
+                    Upload new resume
+                </Button>
             </DialogTrigger>
             <DialogContent className="flex flex-col justify-center items-center gap-2 sm:px-10">
-                <DialogTitle className="pb-1">Upload a New Resume</DialogTitle>
+                <DialogHeader>
+                    <DialogTitle>Upload a New Resume</DialogTitle>
+                    <DialogDescription className="text-muted-foreground text-xs">
+                        Upload a PDF file of your resume. The file will be indexed and available for searching.
+                    </DialogDescription>
+                </DialogHeader>
 
-                <div
-                    onClick={() => {
-                        const secretInput = document.getElementById('secretInput')
-                        secretInput?.click()
-                    }}
-                    className="hover:cursor-pointer hover:bg-gray-200 w-full"
-                >
-                    <Document file={file} noData={'Select a File'} className="text-center border border-black">
+                {!file ? (
+                    <Button
+                        className="w-full text-muted-foreground"
+                        variant={'outline'}
+                        onClick={() => {
+                            secretInputRef.current?.click()
+                        }}
+                    >
+                        Select a File
+                    </Button>
+                ) : (
+                    <Document
+                        file={file}
+                        noData={'Select a File'}
+                        className={`text-center ${file ? 'border border-black' : ''}`}
+                    >
                         <Page pageNumber={1} scale={0.7} />
                     </Document>
-                </div>
-                {file && (
+                )}
+
+                <DialogFooter className={`w-full ${!file ? 'hidden' : ''}`}>
                     <div className="flex flex-col gap-1.5 w-full">
                         <Input
                             className="border border-black"
@@ -102,8 +136,8 @@ export const ResumeUploadDialog = () => {
                         />
                         <Button onClick={handleFileUpload}>Upload</Button>
                     </div>
-                )}
-                <input type="file" id="secretInput" className="hidden" onChange={handleFileChange} />
+                    <input type="file" className="hidden" ref={secretInputRef} onChange={handleFileChange} />
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )

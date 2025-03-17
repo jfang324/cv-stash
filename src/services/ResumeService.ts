@@ -21,39 +21,29 @@ export class ResumeService {
     }
 
     /**
-     * Creates a resume document in the database with the provided data and uploads the file to S3
-     * @param providedResume - A partial resume
-     * @param ownerId - The id of the user
-     * @param file - The file to be uploaded to S3
+     * Creates a resume in the database and uploads it to S3
+     * @param resume - The partial resume object to create
+     * @param ownerId - The id of the user/owner of the resume
+     * @param file - The file to upload
      * @returns The resume object created
      */
-    async createResume(providedResume: Partial<Resume>, ownerId: string, file: File): Promise<Resume> {
-        if (!providedResume || !providedResume.name || !providedResume.textContent || !ownerId) {
-            throw new Error('Insufficient information to create new resume')
-        }
-
-        if (!file || !(file instanceof File) || file.type !== 'application/pdf') {
-            throw new Error('No file provided')
-        }
-
+    async createResume(resume: Omit<Resume, 'id | lastModified'>, ownerId: string, file: File): Promise<Resume> {
         try {
-            const resumeId = crypto.randomBytes(16).toString('hex')
+            const newResumeId = crypto.randomBytes(16).toString('hex')
             const params = {
                 Bucket: process.env.BUCKET_NAME,
-                Key: resumeId,
+                Key: newResumeId,
                 Body: Buffer.from(await file.arrayBuffer()),
                 ContentType: file.type,
             }
 
             await this.s3Client.send(new PutObjectCommand(params))
 
-            const newResume = await this.resumes.createResume(
-                resumeId,
-                providedResume.name,
-                providedResume.textContent,
-                ownerId,
-                file.lastModified
-            )
+            const newResume = await this.resumes.createResume(ownerId, {
+                ...resume,
+                id: newResumeId,
+                lastModified: Date.now(),
+            })
 
             return newResume
         } catch (error) {
@@ -63,15 +53,11 @@ export class ResumeService {
     }
 
     /**
-     * Retrieves all resumes owned by the user
+     * Gets resumes with the associated ownerId
      * @param ownerId - The id of the user
-     * @returns An array of resume objects owned by the user
+     * @returns An array of resumes that belong to the user
      */
     async getResumesByOwnerId(ownerId: string): Promise<Resume[]> {
-        if (!ownerId) {
-            throw new Error('No ownerId provided')
-        }
-
         try {
             const resumes = await this.resumes.getResumesByOwnerId(ownerId)
 
@@ -83,26 +69,28 @@ export class ResumeService {
     }
 
     /**
-     * Creates a presigned for the requested resume
+     * Gets a preSignedUrl for the resume
      * @param resumeId - The id of the resume
      * @param userId - The id of the user
-     * @returns A presigned url for the resume
+     * @returns A preSignedUrl for the resume
      */
     async getPresignedUrl(resumeId: string, userId: string): Promise<string> {
-        if (!resumeId) {
-            throw new Error('No resumeId provided')
-        }
-
         try {
             const params = {
                 Bucket: process.env.BUCKET_NAME,
                 Key: resumeId,
             }
 
-            const resume = await this.resumes.getResumeById(resumeId, userId)
+            const resume = await this.resumes.getResumeById(resumeId)
 
             if (!resume) {
                 throw new Error('No resume found with the provided id')
+            }
+
+            const ownerId = await this.resumes.getOwnerId(resume)
+
+            if (ownerId !== userId) {
+                throw new Error('User does not own this resume')
             }
 
             return await getSignedUrl(this.s3Client, new GetObjectCommand(params), { expiresIn: 3600 })

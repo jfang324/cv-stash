@@ -1,3 +1,4 @@
+import { JobApplication } from '@/interfaces/JobApplication'
 import { Resume } from '@/interfaces/Resume'
 import { User } from '@/interfaces/User'
 import axios, { AxiosInstance } from 'axios'
@@ -15,6 +16,17 @@ export class ApiClient {
      */
     async initializeUser(): Promise<User> {
         const response = await this.httpClient.post('/api/users')
+
+        return response.data
+    }
+
+    /**
+     * Sends a PUT request to /api/users to update the user's profile
+     * @param updatedFields - the updated fields of the user
+     * @returns the updated user object
+     */
+    async updateUser(updatedFields: Partial<User>): Promise<User> {
+        const response = await this.httpClient.put('/api/users', updatedFields)
 
         return response.data
     }
@@ -63,5 +75,26 @@ export class ApiClient {
         const response = await this.httpClient.get(`/api/resumes/${resumeId}`)
 
         return response.data.url
+    }
+
+    /**
+     * Sends a GET request to /api/job-applications to retrieve all job applications
+     * @returns an array of all job applications associated with the user
+     */
+    async retrieveJobApplications(): Promise<JobApplication[]> {
+        const response = await this.httpClient.get('/api/job-applications')
+
+        return response.data
+    }
+
+    /**
+     * Sends a POST request to /api/job-applications to create a new job application
+     * @param jobApplication - the job application object to create
+     * @returns the created job application object
+     */
+    async createJobApplication(jobApplication: Omit<JobApplication, 'id' | 'lastModified'>): Promise<JobApplication> {
+        const response = await this.httpClient.post('/api/job-applications', jobApplication)
+
+        return response.data
     }
 }

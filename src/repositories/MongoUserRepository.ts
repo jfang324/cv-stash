@@ -16,13 +16,25 @@ const userSchema: Schema<UserDocument> = new Schema(
             required: [true, 'All users need to have an ID'],
             unique: [true, 'User ID must be unique'],
         },
-        name: {
+        profilePicture: {
             type: String,
-            required: [true, 'All users need a name'],
+            required: [true, 'All users need a profile picture'],
+        },
+        firstName: {
+            type: String,
+            required: [true, 'All users need a first name'],
+        },
+        lastName: {
+            type: String,
+            required: [true, 'All users need a last name'],
         },
         email: {
             type: String,
             required: [true, 'All users need an email'],
+        },
+        notifications: {
+            type: Boolean,
+            default: true,
         },
     },
     { collection: 'Users' }
@@ -31,19 +43,6 @@ const userSchema: Schema<UserDocument> = new Schema(
 //factory function for retrieving the model
 function UserModel(connection: mongoose.Connection) {
     return mongoose.models.User || connection.model<UserDocument>('User', userSchema)
-}
-
-//maps a document to an object
-function mapUserDocumentToUser(userDocument: UserDocument): User {
-    if (!userDocument || !userDocument.id || !userDocument.name || !userDocument.email) {
-        throw new Error('Invalid User Document')
-    }
-
-    return {
-        id: userDocument.id,
-        name: userDocument.name,
-        email: userDocument.email,
-    }
 }
 
 //UserRepository implemented with mongoose
@@ -59,21 +58,17 @@ export class MongoUserRepository implements UserRepository {
     }
 
     /**
-     * Gets user by id
-     * @param id - The id of the user
-     * @returns The user object or null if they don't exist
+     * Retrieves a user by their ID
+     * @param id - The ID of the user to retrieve
+     * @returns The user object matching the provided ID, or null if no user is found
      */
     async getUserById(id: string): Promise<User | null> {
         const userModel = UserModel(this.connection)
 
         try {
-            const user = await userModel.findOne({ id })
+            const user = await userModel.findOne({ id }).lean<User>().select('-_id -__v')
 
-            if (!user) {
-                return null
-            }
-
-            return mapUserDocumentToUser(user)
+            return user || null
         } catch (error) {
             console.error(`UserRepository failed to retrieve user by ID: ${error}`)
             throw new Error('UserRepository failed to retrieve user by ID')
@@ -81,22 +76,56 @@ export class MongoUserRepository implements UserRepository {
     }
 
     /**
-     * Creates a user object in the database with the given credentials
-     * @param id - The auth0 id of the user
-     * @param name - The name of the user
-     * @param email - The email of the user
-     * @returns The user object that was created
+     * Creates a new user in the database
+     * @param user - The user object to create
+     * @returns The created user object
      */
-    async createUser(id: string, name: string, email: string): Promise<User> {
+    async createUser(user: User): Promise<User> {
         const userModel = UserModel(this.connection)
 
         try {
-            const user = await userModel.create({ id, name, email })
+            const newUser = (await userModel.create(user)).toObject({
+                select: ['-_id -__v'],
+            })
 
-            return mapUserDocumentToUser(user)
+            return newUser
         } catch (error) {
             console.error(`UserRepository failed to create a new user: ${error}`)
             throw new Error('UserRepository failed to create a new user')
+        }
+    }
+
+    /**
+     * Updates a user in the database
+     * @param id - The ID of the user to update
+     * @param updatedFields - The updated fields of the user
+     * @returns The updated user object
+     */
+    async updateUserById(id: string, updatedFields: Partial<User>): Promise<User> {
+        const userModel = UserModel(this.connection)
+
+        try {
+            const updatedUser = await userModel
+                .findOneAndUpdate(
+                    { id: id },
+                    {
+                        $set: {
+                            ...updatedFields,
+                        },
+                    },
+                    { new: true, runValidators: true }
+                )
+                .lean<User>()
+                .select('-_id -__v')
+
+            if (!updatedUser) {
+                throw new Error('User not found')
+            }
+
+            return updatedUser
+        } catch (error) {
+            console.error(`UserRepository failed to update user: ${error}`)
+            throw new Error('UserRepository failed to update user')
         }
     }
 }
