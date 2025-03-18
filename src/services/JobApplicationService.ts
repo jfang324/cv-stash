@@ -53,4 +53,70 @@ export class JobApplicationService {
             throw new Error('JobApplicationService failed to retrieve job applications')
         }
     }
+
+    /**
+     * Deletes a job application by id
+     * @param jobApplicationId - The id of the job application to delete
+     * @param userId - The id of the user
+     * @returns The deleted job application object
+     */
+    async deleteJobApplicationById(jobApplicationId: string, userId: string): Promise<JobApplication> {
+        try {
+            const jobApplication = await this.jobApplications.getJobApplicationById(jobApplicationId)
+
+            if (!jobApplication) {
+                throw new Error('No job application found with the provided id')
+            }
+
+            const ownerId = await this.jobApplications.getOwnerId(jobApplication)
+
+            if (ownerId !== userId) {
+                throw new Error('User does not own this job application')
+            }
+
+            const deletedJobApplication = await this.jobApplications.deleteJobApplicationById(jobApplicationId)
+
+            return deletedJobApplication
+        } catch (error) {
+            console.error(`JobApplicationService failed to delete a job application by id: ${error}`)
+            throw new Error('JobApplicationService failed to delete a job application by id')
+        }
+    }
+
+    /**
+     * Updates a job application by id
+     * @param jobApplicationId - The id of the job application to update
+     * @param updatedFields - The updated fields of the job application
+     * @param userId - The id of the user
+     * @returns The updated job application object
+     */
+    async updateJobApplicationById(
+        jobApplicationId: string,
+        updatedFields: Partial<JobApplication>,
+        userId: string
+    ): Promise<JobApplication> {
+        try {
+            const jobApplication = await this.jobApplications.getJobApplicationById(jobApplicationId)
+
+            if (!jobApplication) {
+                throw new Error('No job application found with the provided id')
+            }
+
+            const ownerId = await this.jobApplications.getOwnerId(jobApplication)
+
+            if (ownerId !== userId) {
+                throw new Error('User does not own this job application')
+            }
+
+            const updatedJobApplication = await this.jobApplications.updateJobApplicationById(
+                jobApplicationId,
+                updatedFields
+            )
+
+            return updatedJobApplication
+        } catch (error) {
+            console.error(`JobApplicationService failed to update a job application: ${error}`)
+            throw new Error('JobApplicationService failed to update a job application')
+        }
+    }
 }

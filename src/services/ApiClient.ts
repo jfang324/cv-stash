@@ -97,4 +97,44 @@ export class ApiClient {
 
         return response.data
     }
+
+    /**
+     * Sends a DELETE request to /api/resumes/:resumeId to delete a resume
+     * @param resumeId - the ID of the resume to delete
+     * @returns the deleted resume object
+     */
+    async deleteResume(resumeId: string): Promise<Resume> {
+        const response = await this.httpClient.delete(`/api/resumes/${resumeId}`)
+
+        return response.data
+    }
+
+    /**
+     * Sends a DELETE request to /api/job-applications/:jobApplicationId to delete a job application
+     * @param jobApplicationId - the ID of the job application to delete
+     * @returns the deleted job application object
+     */
+    async deleteJobApplication(jobApplicationId: string): Promise<JobApplication> {
+        const response = await this.httpClient.delete(`/api/job-applications/${jobApplicationId}`)
+
+        return response.data
+    }
+
+    /**
+     * Sends a PUT request to /api/job-applications/:jobApplicationId to update a job application
+     * @param jobApplicationId - the ID of the job application to update
+     * @param updatedFields - the updated fields of the job application
+     * @returns the updated job application object
+     */
+    async updateJobApplication(
+        jobApplicationId: string,
+        updatedFields: Partial<JobApplication>
+    ): Promise<JobApplication> {
+        const response = await this.httpClient.put(`/api/job-applications/${jobApplicationId}`, updatedFields)
+
+        return response.data
+    }
 }
+
+//export a single instance to be used across the app
+export const apiClient = new ApiClient()

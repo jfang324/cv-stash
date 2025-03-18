@@ -14,3 +14,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         return handleError(error)
     }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ resumeId: string }> }) {
+    try {
+        const user = await validateSessionAndGetUser(['sub'])
+        const resumeService = await getResumeService()
+        const { resumeId } = await params
+
+        const deletedResume = await resumeService.deleteResumeById(resumeId, user.sub)
+
+        return NextResponse.json(deletedResume, { status: 200 })
+    } catch (error: any) {
+        return handleError(error)
+    }
+}

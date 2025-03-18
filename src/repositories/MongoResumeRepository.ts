@@ -37,6 +37,15 @@ const resumeSchema: Schema<ResumeDocument> = new Schema(
     { collection: 'Resumes' }
 )
 
+//When a  resume is deleted, also delete all associated job applications
+resumeSchema.post('findOneAndDelete', async function (doc) {
+    if (doc) {
+        const jobApplicationsModel = mongoose.models.JobApplication
+
+        await jobApplicationsModel.deleteMany({ resume: doc.id })
+    }
+})
+
 //factory function for retrieving the model
 function ResumeModel(connection: mongoose.Connection) {
     return mongoose.models.Resume || connection.model<ResumeDocument>('Resume', resumeSchema)
@@ -52,24 +61,6 @@ export class MongoResumeRepository implements ResumeRepository {
         }
 
         this.connection = connection
-    }
-
-    /**
-     * Gets resumes with the associated ownerId
-     * @param ownerId - The id of the user
-     * @returns An array of resumes that belong to the user
-     */
-    async getResumesByOwnerId(ownerId: string): Promise<Resume[]> {
-        const resumeModel = ResumeModel(this.connection)
-
-        try {
-            const resumes = await resumeModel.find({ ownerId }).lean<Resume[]>().select('-_id -__v -ownerId')
-
-            return resumes
-        } catch (error) {
-            console.error(`ResumeRepository failed to retrieve resumes by owner ID: ${error}`)
-            throw new Error('ResumeRepository failed to retrieve resumes by owner ID')
-        }
     }
 
     /**
@@ -112,6 +103,24 @@ export class MongoResumeRepository implements ResumeRepository {
     }
 
     /**
+     * Gets resumes with the associated ownerId
+     * @param ownerId - The id of the user
+     * @returns An array of resumes that belong to the user
+     */
+    async getResumesByOwnerId(ownerId: string): Promise<Resume[]> {
+        const resumeModel = ResumeModel(this.connection)
+
+        try {
+            const resumes = await resumeModel.find({ ownerId }).lean<Resume[]>().select('-_id -__v -ownerId')
+
+            return resumes
+        } catch (error) {
+            console.error(`ResumeRepository failed to retrieve resumes by owner ID: ${error}`)
+            throw new Error('ResumeRepository failed to retrieve resumes by owner ID')
+        }
+    }
+
+    /**
      * Gets the ownerId of a resume
      * @param resume - The resume object
      * @returns The ownerId of the resume
@@ -126,6 +135,24 @@ export class MongoResumeRepository implements ResumeRepository {
         } catch (error) {
             console.error(`ResumeRepository failed to retrieve ownerId: ${error}`)
             throw new Error('ResumeRepository failed to retrieve ownerId')
+        }
+    }
+
+    /**
+     * Deletes a resume by id
+     * @param id - The id of the resume to delete
+     * @returns The deleted resume object
+     */
+    async deleteResumeById(id: string): Promise<Resume> {
+        const resumeModel = ResumeModel(this.connection)
+
+        try {
+            const deletedResume = await resumeModel.findOneAndDelete({ id }).select('-_id -__v -ownerId')
+
+            return deletedResume
+        } catch (error) {
+            console.error(`ResumeRepository failed to delete resume by id: ${error}`)
+            throw new Error('ResumeRepository failed to delete resume by id')
         }
     }
 }

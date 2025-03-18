@@ -1,6 +1,6 @@
 'use client'
 import { Resume } from '@/interfaces/Resume'
-import { ApiClient } from '@/services/ApiClient'
+import { apiClient } from '@/services/ApiClient'
 import { useUser } from '@auth0/nextjs-auth0'
 import Fuse from 'fuse.js'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
@@ -28,13 +28,13 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
             ignoreLocation: true,
         })
     )
-    const apiClient = useMemo(() => new ApiClient(), [])
 
     useEffect(() => {
         const initializeIndex = async () => {
             if (!isLoading && user) {
                 try {
                     const resumes = await apiClient.retrieveResumes()
+
                     setIndex(
                         new Fuse(resumes, {
                             keys: ['textContent'],
@@ -49,8 +49,9 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
                 }
             }
         }
+
         initializeIndex()
-    }, [user, isLoading, apiClient])
+    }, [user, isLoading])
 
     /**
      * Adds a resume to the search index

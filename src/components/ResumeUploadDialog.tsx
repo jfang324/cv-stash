@@ -14,9 +14,9 @@ import { useToast } from '@/hooks/use-toast'
 import { useSearchIndex } from '@/hooks/useSearchIndex'
 import { Resume } from '@/interfaces/Resume'
 import { parsePdf } from '@/lib/utils'
-import { ApiClient } from '@/services/ApiClient'
+import { apiClient } from '@/services/ApiClient'
 import { Upload } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Document, Page } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
@@ -28,7 +28,6 @@ interface ResumeUploadDialogProps {
 export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
     const [file, setFile] = useState<File | undefined>()
     const [resumeName, setResumeName] = useState<string>()
-    const apiClient = useMemo(() => new ApiClient(), [])
     const { toast } = useToast()
     const { addToIndex } = useSearchIndex()
 
@@ -98,6 +97,7 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
                     Upload new resume
                 </Button>
             </DialogTrigger>
+
             <DialogContent className="flex flex-col justify-center items-center gap-2 sm:px-10">
                 <DialogHeader>
                     <DialogTitle>Upload a New Resume</DialogTitle>
@@ -120,7 +120,10 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
                     <Document
                         file={file}
                         noData={'Select a File'}
-                        className={`text-center ${file ? 'border border-black' : ''}`}
+                        className={`text-center ${file ? 'border border-black hover:cursor-pointer' : ''}`}
+                        onClick={() => {
+                            secretInputRef.current?.click()
+                        }}
                     >
                         <Page pageNumber={1} scale={0.7} />
                     </Document>

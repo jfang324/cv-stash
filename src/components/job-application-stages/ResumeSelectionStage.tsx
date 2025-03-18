@@ -6,9 +6,9 @@ import { useToast } from '@/hooks/use-toast'
 import { useSearchIndex } from '@/hooks/useSearchIndex'
 import { JobApplicationFormFields } from '@/interfaces/JobApplicationFormFields'
 import { Resume } from '@/interfaces/Resume'
-import { ApiClient } from '@/services/ApiClient'
+import { apiClient } from '@/services/ApiClient'
 import { CheckCircle, ExternalLink } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface ResumeSelectionStageProps {
     formData: JobApplicationFormFields
@@ -19,12 +19,13 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSel
     const [resumes, setResumes] = useState<Resume[]>([])
     const { searchIndex } = useSearchIndex()
     const { toast } = useToast()
-    const apiClient = useMemo(() => new ApiClient(), [])
 
     useEffect(() => {
         try {
             const searchResults = searchIndex(formData.jobDescription, 4)
 
+            //if a resume is already selected we want to make sure it is displayed even if it doesn't get a high fuse score
+            //however, if it is part of the search results we don't want to duplicate it
             if (formData.resume && !searchResults.includes(formData.resume)) searchResults.push(formData.resume)
 
             setResumes(searchResults)
