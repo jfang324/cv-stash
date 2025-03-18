@@ -58,24 +58,6 @@ export class MongoUserRepository implements UserRepository {
     }
 
     /**
-     * Retrieves a user by their ID
-     * @param id - The ID of the user to retrieve
-     * @returns The user object matching the provided ID, or null if no user is found
-     */
-    async getUserById(id: string): Promise<User | null> {
-        const userModel = UserModel(this.connection)
-
-        try {
-            const user = await userModel.findOne({ id }).lean<User>().select('-_id -__v')
-
-            return user || null
-        } catch (error) {
-            console.error(`UserRepository failed to retrieve user by ID: ${error}`)
-            throw new Error('UserRepository failed to retrieve user by ID')
-        }
-    }
-
-    /**
      * Creates a new user in the database
      * @param user - The user object to create
      * @returns The created user object
@@ -96,6 +78,24 @@ export class MongoUserRepository implements UserRepository {
     }
 
     /**
+     * Retrieves a user by their ID
+     * @param id - The ID of the user to retrieve
+     * @returns The user object matching the provided ID, or null if no user is found
+     */
+    async getUserById(id: string): Promise<User | null> {
+        const userModel = UserModel(this.connection)
+
+        try {
+            const user = await userModel.findOne({ id }).lean<User>().select('-_id -__v')
+
+            return user || null
+        } catch (error) {
+            console.error(`UserRepository failed to retrieve user by ID: ${error}`)
+            throw new Error('UserRepository failed to retrieve user by ID')
+        }
+    }
+
+    /**
      * Updates a user in the database
      * @param id - The ID of the user to update
      * @param updatedFields - The updated fields of the user
@@ -107,7 +107,7 @@ export class MongoUserRepository implements UserRepository {
         try {
             const updatedUser = await userModel
                 .findOneAndUpdate(
-                    { id: id },
+                    { id },
                     {
                         $set: {
                             ...updatedFields,

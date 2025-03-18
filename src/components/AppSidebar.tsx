@@ -135,18 +135,23 @@ export const AppSidebar = () => {
                                         <ChevronDown className="ml-auto h-4 w-4" />
                                     </SidebarMenuButton>
                                 </DropdownMenuTrigger>
+
                                 <DropdownMenuContent align="end" className="w-56">
-                                    <DropdownMenuItem>
-                                        <User className="mr-2 h-4 w-4" />
-                                        <span>My Profile</span>
+                                    <DropdownMenuItem className="hover:cursor-pointer" asChild>
+                                        <Link href="/settings">
+                                            <User className="mr-2 h-4 w-4" />
+                                            <span>My Profile</span>
+                                        </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                        <Settings className="mr-2 h-4 w-4" />
-                                        <span>Account Settings</span>
+                                    <DropdownMenuItem className="hover:cursor-pointer" asChild>
+                                        <Link href="/settings">
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            <span>Account Settings</span>
+                                        </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                        <a href="/auth/logout" className="hover:cursor-pointer">
+                                    <DropdownMenuItem className="hover:cursor-pointer" asChild>
+                                        <a href="/auth/logout">
                                             <LogOut className="mr-2 h-4 w-4" />
                                             <span>Log out</span>
                                         </a>

@@ -52,7 +52,7 @@ const jobApplicationSchema: Schema<JobApplicationDocument> = new Schema(
 )
 
 //factory function for retrieving the model
-function JobApplicationModel(connection: mongoose.Connection) {
+export function JobApplicationModel(connection: mongoose.Connection) {
     return (
         mongoose.models.JobApplication ||
         connection.model<JobApplicationDocument>('JobApplication', jobApplicationSchema)
@@ -69,6 +69,50 @@ export class MongoJobApplicationRepository implements JobApplicationRepository {
         }
 
         this.connection = connection
+    }
+
+    /**
+     * Creates a job application in the database
+     * @param ownerId - The id of the user/owner of the job application
+     * @param jobApplication - The job application object to create
+     * @returns The created job application object
+     */
+    async createJobApplication(ownerId: string, jobApplication: JobApplication): Promise<JobApplication> {
+        const jobApplicationModel = JobApplicationModel(this.connection)
+
+        try {
+            const newJobApplication = (
+                await jobApplicationModel.create({ ...jobApplication, resume: jobApplication.resume.id, ownerId })
+            ).toObject({
+                select: ['-_id -__v -ownerId'],
+            })
+
+            return newJobApplication
+        } catch (error) {
+            console.error(`JobApplicationRepository failed to create a new job application: ${error}`)
+            throw new Error('JobApplicationRepository failed to create a new job application')
+        }
+    }
+
+    /**
+     * Gets a job application by id
+     * @param id - The id of the job application
+     * @returns The job application object or null if it doesn't exist
+     */
+    async getJobApplicationById(id: string): Promise<JobApplication | null> {
+        const jobApplicationModel = JobApplicationModel(this.connection)
+
+        try {
+            const jobApplication = await jobApplicationModel
+                .findOne({ id })
+                .lean<JobApplication>()
+                .select('-_id -__v -ownerId')
+
+            return jobApplication || null
+        } catch (error) {
+            console.error(`JobApplicationRepository failed to retrieve a job application by id: ${error}`)
+            throw new Error('JobApplicationRepository failed to retrieve a job application by id')
+        }
     }
 
     /**
@@ -101,25 +145,72 @@ export class MongoJobApplicationRepository implements JobApplicationRepository {
     }
 
     /**
-     * Creates a job application in the database
-     * @param ownerId - The id of the user/owner of the job application
-     * @param jobApplication - The job application object to create
-     * @returns The created job application object
+     * Gets the ownerId of a job application
+     * @param jobApplication - The job application object
+     * @returns The ownerId of the job application
      */
-    async createJobApplication(ownerId: string, jobApplication: JobApplication): Promise<JobApplication> {
+    async getOwnerId(jobApplication: JobApplication): Promise<string> {
         const jobApplicationModel = JobApplicationModel(this.connection)
 
         try {
-            const newJobApplication = (
-                await jobApplicationModel.create({ ...jobApplication, resume: jobApplication.resume.id, ownerId })
-            ).toObject({
-                select: ['-_id -__v -ownerId'],
-            })
+            const jobApplicationDocument = await jobApplicationModel
+                .findOne({ id: jobApplication.id })
+                .select('-_id -__v')
 
-            return newJobApplication
+            return jobApplicationDocument.ownerId
         } catch (error) {
-            console.error(`JobApplicationRepository failed to create a new job application: ${error}`)
-            throw new Error('JobApplicationRepository failed to create a new job application')
+            console.error(`JobApplicationRepository failed to retrieve ownerId: ${error}`)
+            throw new Error('JobApplicationRepository failed to retrieve ownerId')
+        }
+    }
+
+    /**
+     * Updates a job application in the database
+     * @param id - The id of the job application to update
+     * @param updatedFields - The updated fields of the job application
+     * @returns The updated job application object
+     */
+    async updateJobApplicationById(id: string, updatedFields: Partial<JobApplication>): Promise<JobApplication> {
+        const jobApplicationModel = JobApplicationModel(this.connection)
+
+        try {
+            const updatedJobApplication = await jobApplicationModel.findOneAndUpdate(
+                { id },
+                {
+                    $set: {
+                        ...updatedFields,
+                        resume: updatedFields.resume!.id,
+                    },
+                },
+                {
+                    new: true,
+                }
+            )
+
+            return updatedJobApplication
+        } catch (error) {
+            console.error(`JobApplicationRepository failed to update a job application by id: ${error}`)
+            throw new Error('JobApplicationRepository failed to update a job application by id')
+        }
+    }
+
+    /**
+     * Deletes a job application by id
+     * @param id - The id of the job application to delete
+     * @returns The deleted job application object
+     */
+    async deleteJobApplicationById(id: string): Promise<JobApplication> {
+        const jobApplicationModel = JobApplicationModel(this.connection)
+
+        try {
+            const deletedJobApplication = await jobApplicationModel
+                .findOneAndDelete({ id })
+                .select('-_id -__v -ownerId')
+
+            return deletedJobApplication
+        } catch (error) {
+            console.error(`JobApplicationRepository failed to delete a job application by id: ${error}`)
+            throw new Error('JobApplicationRepository failed to delete a job application by id')
         }
     }
 }

@@ -32,6 +32,7 @@ export const ImageCarousel = ({ images }: ImageCarouselProps) => {
                     </CarouselItem>
                 ))}
             </CarouselContent>
+
             <CarouselPrevious />
             <CarouselNext />
         </Carousel>

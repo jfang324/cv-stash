@@ -1,6 +1,6 @@
 import { Resume } from '@/interfaces/Resume'
 import { ResumeRepository } from '@/interfaces/ResumeRepository'
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import crypto from 'crypto'
 
@@ -97,6 +97,41 @@ export class ResumeService {
         } catch (error) {
             console.error(`ResumeService failed to retrieve a presigned url: ${error}`)
             throw new Error('ResumeService failed to retrieve a presigned url')
+        }
+    }
+
+    /**
+     * Deletes a resume by id
+     * @param resumeId - The id of the resume to delete
+     * @param userId - The id of the user
+     * @returns The deleted resume object
+     */
+    async deleteResumeById(resumeId: string, userId: string): Promise<Resume> {
+        try {
+            const resume = await this.resumes.getResumeById(resumeId)
+
+            if (!resume) {
+                throw new Error('No resume found with the provided id')
+            }
+
+            const ownerId = await this.resumes.getOwnerId(resume)
+
+            if (ownerId !== userId) {
+                throw new Error('User does not own this resume')
+            }
+
+            const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Key: resumeId,
+            }
+
+            await this.s3Client.send(new DeleteObjectCommand(params))
+            const deletedResume = await this.resumes.deleteResumeById(resumeId)
+
+            return deletedResume
+        } catch (error) {
+            console.error(`ResumeService failed to delete a resume: ${error}`)
+            throw new Error('ResumeService failed to delete a resume')
         }
     }
 }

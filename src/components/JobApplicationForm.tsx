@@ -8,9 +8,9 @@ import { useToast } from '@/hooks/use-toast'
 import { JobApplication } from '@/interfaces/JobApplication'
 import { JobApplicationFormFields } from '@/interfaces/JobApplicationFormFields'
 import { Resume } from '@/interfaces/Resume'
-import { ApiClient } from '@/services/ApiClient'
+import { apiClient } from '@/services/ApiClient'
 import { Briefcase, CheckCircle, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 export const JobApplicationForm = () => {
     const [stage, setStage] = useState<number>(1)
@@ -20,7 +20,6 @@ export const JobApplicationForm = () => {
         jobDescription: '',
         resume: null,
     })
-    const apiClient = useMemo(() => new ApiClient(), [])
     const { toast } = useToast()
 
     /**

@@ -1,4 +1,3 @@
-'use client'
 import { JobApplicationForm } from '@/components/JobApplicationForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -31,6 +30,7 @@ export default function DashboardPage() {
                             </CardHeader>
                             <CardContent>Coming soon...</CardContent>
                         </Card>
+
                         <Card className="w-full sm:flex-1">
                             <CardHeader>
                                 <CardTitle>
@@ -43,6 +43,7 @@ export default function DashboardPage() {
                             <CardContent>Coming soon...</CardContent>
                         </Card>
                     </div>
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Recent Activity</CardTitle>

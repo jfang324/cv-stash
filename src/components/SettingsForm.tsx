@@ -5,9 +5,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useUserMetadata } from '@/hooks/useUserMetadata'
-import { ApiClient } from '@/services/ApiClient'
+import { apiClient } from '@/services/ApiClient'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -20,7 +20,6 @@ const formSchema = z.object({
 export const SettingsForm = () => {
     const { user, refreshUserMetadata } = useUserMetadata()
     const { toast } = useToast()
-    const apiClient = useMemo(() => new ApiClient(), [])
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
