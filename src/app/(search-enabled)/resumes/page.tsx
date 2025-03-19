@@ -46,7 +46,6 @@ export default function ResumesPage() {
      */
     const handleAddResume = async (resume: Resume) => {
         setResumes([...resumes, resume])
-        addToIndex(resume)
     }
 
     /**

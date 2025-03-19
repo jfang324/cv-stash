@@ -37,7 +37,17 @@ const userSchema: Schema<UserDocument> = new Schema(
             default: true,
         },
     },
-    { collection: 'Users' }
+    {
+        toObject: {
+            transform: (doc, ret) => {
+                delete ret._id
+                delete ret.__v
+
+                return ret
+            },
+        },
+        collection: 'Users',
+    }
 )
 
 //factory function for retrieving the model
@@ -66,9 +76,7 @@ export class MongoUserRepository implements UserRepository {
         const userModel = UserModel(this.connection)
 
         try {
-            const newUser = (await userModel.create(user)).toObject({
-                select: ['-_id -__v'],
-            })
+            const newUser = (await userModel.create(user)).toObject()
 
             return newUser
         } catch (error) {

@@ -43,12 +43,27 @@ const jobApplicationSchema: Schema<JobApplicationDocument> = new Schema(
             type: String,
             required: [true, 'All job applications need an owner Id'],
         },
+        dateApplied: {
+            type: Number,
+            required: [true, 'All job applications need a date applied'],
+        },
         lastModified: {
             type: Number,
             required: [true, 'All job applications need a last modified date'],
         },
     },
-    { collection: 'JobApplications' }
+    {
+        toObject: {
+            transform: (doc, ret) => {
+                delete ret._id
+                delete ret.__v
+                delete ret.ownerId
+
+                return ret
+            },
+        },
+        collection: 'JobApplications',
+    }
 )
 
 //factory function for retrieving the model
@@ -82,10 +97,17 @@ export class MongoJobApplicationRepository implements JobApplicationRepository {
 
         try {
             const newJobApplication = (
-                await jobApplicationModel.create({ ...jobApplication, resume: jobApplication.resume.id, ownerId })
-            ).toObject({
-                select: ['-_id -__v -ownerId'],
-            })
+                await (
+                    await jobApplicationModel.create({ ...jobApplication, resume: jobApplication.resume.id, ownerId })
+                ).populate({
+                    path: 'resume',
+                    model: 'Resume',
+                    localField: 'resume',
+                    foreignField: 'id',
+                    select: '-_id -__v -ownerId',
+                    options: { lean: true },
+                })
+            ).toObject()
 
             return newJobApplication
         } catch (error) {
@@ -174,18 +196,34 @@ export class MongoJobApplicationRepository implements JobApplicationRepository {
         const jobApplicationModel = JobApplicationModel(this.connection)
 
         try {
-            const updatedJobApplication = await jobApplicationModel.findOneAndUpdate(
-                { id },
-                {
-                    $set: {
-                        ...updatedFields,
-                        resume: updatedFields.resume!.id,
+            const updatedJobApplication = await jobApplicationModel
+                .findOneAndUpdate(
+                    { id },
+                    {
+                        $set: {
+                            ...updatedFields,
+                            resume: updatedFields.resume!.id,
+                            lastModified: Date.now(),
+                        },
                     },
-                },
-                {
-                    new: true,
-                }
-            )
+                    {
+                        new: true,
+                    }
+                )
+                .populate({
+                    path: 'resume',
+                    model: 'Resume',
+                    localField: 'resume',
+                    foreignField: 'id',
+                    select: '-_id -__v -ownerId',
+                    options: { lean: true },
+                })
+                .lean<JobApplication>()
+                .select('-_id -__v -ownerId')
+
+            if (!updatedJobApplication) {
+                throw new Error('Job application not found')
+            }
 
             return updatedJobApplication
         } catch (error) {

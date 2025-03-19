@@ -108,10 +108,10 @@ export class JobApplicationService {
                 throw new Error('User does not own this job application')
             }
 
-            const updatedJobApplication = await this.jobApplications.updateJobApplicationById(
-                jobApplicationId,
-                updatedFields
-            )
+            const updatedJobApplication = await this.jobApplications.updateJobApplicationById(jobApplicationId, {
+                ...updatedFields,
+                lastModified: Date.now(),
+            })
 
             return updatedJobApplication
         } catch (error) {

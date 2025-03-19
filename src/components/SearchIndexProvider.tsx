@@ -4,6 +4,7 @@ import { apiClient } from '@/services/ApiClient'
 import { useUser } from '@auth0/nextjs-auth0'
 import Fuse from 'fuse.js'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
+import { removeStopwords } from 'stopword'
 
 interface SearchIndexProviderProps {
     children: React.ReactNode
@@ -91,18 +92,25 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
      */
     const searchIndex = useCallback(
         (query: string, numResults: number = 5): Resume[] => {
-            const cleanedQuery = query
+            //remove punctuation, symbols and brackets from the query
+            const cleanedText = query
+                .replace(/[\u2022\u2023\u25AA\u25AB\u2013\u2014\u2015•◦●|,]/g, '\n')
                 .split(/(?:\. |, |\n)/)
                 .map((line) => {
-                    return {
-                        textContent: line
-                            .replace(/[\u2022\u2023\u25AA\u25AB\u2013\u2014\u2015•◦●|,]/g, '')
-                            .replace(/\s+/g, ' ')
-                            .trim(),
-                    }
+                    return line
+                        .replace(/[\[\]{}():;]/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim()
                 })
-                .filter((line) => line.textContent.length > 0)
-            const results = index.search({ $or: cleanedQuery }, { limit: numResults })
+                .filter((line) => line.length > 0)
+                .join(' ')
+
+            //remove stopwords from the query to avoid diluting the search
+            const keyWords = removeStopwords(cleanedText.split(' ')).map((word) => {
+                return { textContent: word }
+            })
+
+            const results = index.search({ $or: keyWords }, { limit: numResults })
 
             return results.map((result) => result.item)
         },
