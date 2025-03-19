@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## About The Project
+
+A full stack web application that streamlines the process of applying for jobs by allowing users to store tailored resumes and automatically selecting the best resumes for each job application. The application also includes features for tracking job applications, so you can easily check which resume you applied with and what the job description was. Visit [cv-stash.com](https://cv-stash.com) to try it out!
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+To use this application, you will need accounts for the following services:
+
+-   Auth0
+-   MongoDB Atlas
+-   Amazon S3
+
+### Installation
+
+To install the application locally, run the following commands:
+
+1. Clone the repository:
+
+```sh
+git clone https://github.com/jfang324/cv-stash.git
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Navigate to the project directory:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+cd cv-stash
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Install the dependencies:
 
-## Learn More
+```sh
+npm install
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Create a `.env` file in the project directory and add the following environment variables:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+//use values provided to you after creating an app in auth0
+AUTH0_DOMAIN = <provided by auth0>
+AUTH0_CLIENT_ID = <provided by auth0>
+AUTH0_CLIENT_SECRET = <provided by auth0>
+AUTH0_SECRET = 'use [openssl rand -hex 32] to generate a 32 bytes value'
+APP_BASE_URL = 'http://localhost:3000'
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+//use values provided after creating a bucket in s3 and an IAM user with read and write permissions
+BUCKET_NAME = <bucket name>
+BUCKET_REGION = <bucket region>
+ACCESS_KEY = <bucket access key>
+SECRET_ACCESS_KEY = <bucket secret access key>
 
-## Deploy on Vercel
+//use values provided after creating a database in mongodb atlas
+DATABASE_URL = <url provided after creating and choosing to programatiically connect>
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. Start the application:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sh
+npm run build
+npm run start
+```
+
+6. Open your browser and navigate to `http://localhost:3000` to access the application.
+
+## Gallery & Demonstrations
+
+## Known Issues
+
+-   The app sidebar momentarily shows a login button after the user is authenticated due to cold start issues
+
+## Contact
+
+Jeffery Fang - [jefferyfang324@gmail.com](mailto:jefferyfang324@gmail.com)
+
+## Tools & Technologies
+
+-   Next.js
+-   React
+-   Tailwind CSS
+-   Auth0
+-   MongoDB Atlas
+-   Amazon S3
+-   shadcn/ui

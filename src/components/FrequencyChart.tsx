@@ -1,7 +1,7 @@
 'use client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartConfig, ChartContainer } from '@/components/ui/chart'
-import { Briefcase } from 'lucide-react'
+import { Briefcase, FileText } from 'lucide-react'
 import { Line, LineChart, Tooltip, XAxis, type TooltipProps } from 'recharts'
 
 interface FrequencyChartProps {
@@ -39,7 +39,11 @@ export const FrequencyChart = ({ data, dataType }: FrequencyChartProps) => {
             <CardHeader>
                 <CardTitle>
                     <div className="flex items-center gap-2">
-                        <Briefcase className="h-4 w-4" />
+                        {dataType === 'applications' ? (
+                            <Briefcase className="h-6 w-6" />
+                        ) : (
+                            <FileText className="h-6 w-6" />
+                        )}
                         <span className="font-bold">
                             {dataType === 'applications' ? 'Job Application' : 'Resume Upload'} Frequency
                         </span>

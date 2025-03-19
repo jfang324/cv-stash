@@ -109,11 +109,11 @@ export const calculateRecentActivity = (applications: JobApplication[], resumes:
 
     const recentApplications = applications
         .filter((application) => application.dateApplied >= cutoffDate)
-        .sort((a, b) => (a.dateApplied < b.dateApplied ? -1 : 1))
+        .sort((a, b) => (a.dateApplied > b.dateApplied ? -1 : 1))
 
     const recentResumes = resumes
         .filter((resume) => resume.lastModified >= cutoffDate)
-        .sort((a, b) => (a.lastModified < b.lastModified ? -1 : 1))
+        .sort((a, b) => (a.lastModified > b.lastModified ? -1 : 1))
 
     const recentActivity: (JobApplication | Resume)[] = []
 

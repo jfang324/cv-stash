@@ -1,19 +1,14 @@
 'use client'
 import { FrequencyChart } from '@/components/FrequencyChart'
 import { JobApplicationForm } from '@/components/JobApplicationForm'
+import { RecentActivity } from '@/components/RecentActivity'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { JobApplication } from '@/interfaces/JobApplication'
 import { Resume } from '@/interfaces/Resume'
-import {
-    calculateApplicationFrequency,
-    calculateDateDiff,
-    calculateRecentActivity,
-    calculateResumeUploadFrequency,
-} from '@/lib/utils'
+import { calculateApplicationFrequency, calculateRecentActivity, calculateResumeUploadFrequency } from '@/lib/utils'
 import { apiClient } from '@/services/ApiClient'
-import { Briefcase, FileText } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function DashboardPage() {
@@ -65,35 +60,7 @@ export default function DashboardPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {calculateRecentActivity(applications, resumes).map((item) => (
-                                <div key={item.id} className="flex items-center p-3 border rounded-lg">
-                                    {'name' in item ? (
-                                        <div className="flex flex-row gap-1 w-full">
-                                            <FileText className="h-6 w-6 mr-2 my-auto" />
-                                            <div className="flex flex-col">
-                                                <h1 className="text-sm font-semibold">{`Uploaded resume: ${item.name}`}</h1>
-                                                <p className="text-muted-foreground text-xs">
-                                                    {`${calculateDateDiff(
-                                                        new Date(item.lastModified),
-                                                        new Date()
-                                                    )} days ago`}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-row gap-1 w-full">
-                                            <Briefcase className="h-6 w-6 mr-2 my-auto" />
-                                            <div className="flex flex-col">
-                                                <h1 className="text-sm font-semibold">{`Applied to: ${item.companyName} • ${item.jobTitle}`}</h1>
-                                                <p className="text-muted-foreground text-xs">
-                                                    {`${calculateDateDiff(
-                                                        new Date(item.dateApplied),
-                                                        new Date()
-                                                    )} days ago`}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                <RecentActivity item={item} key={item.id} />
                             ))}
                         </CardContent>
                     </Card>
