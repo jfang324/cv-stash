@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
                 jobDescription,
                 resume,
                 status: 'Applied',
+                dateApplied: Date.now(),
             } as Omit<JobApplication, 'id' | 'lastModified'>,
             user.sub
         )

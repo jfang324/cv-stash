@@ -94,7 +94,7 @@ export const JobApplicationCard = ({
                                             {/* Hack to make the select trigger look like a pencil icon */}
                                             <Button variant={'outline'} size={'icon'} className="h-8 w-8" asChild>
                                                 <div className="hover:cursor-pointer">
-                                                    <SelectTrigger className="absolute h-4 w-4 text-background border-none focus:invisible" />
+                                                    <SelectTrigger className="absolute h-8 w-8 text-background focus:ring-0" />
                                                     <Pencil className="h-4 w-4" />
                                                 </div>
                                             </Button>

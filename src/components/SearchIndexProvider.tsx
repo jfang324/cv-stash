@@ -35,6 +35,7 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
                 try {
                     const resumes = await apiClient.retrieveResumes()
 
+                    console.log('Resumes retrieved:', resumes)
                     setIndex(
                         new Fuse(resumes, {
                             keys: ['textContent'],

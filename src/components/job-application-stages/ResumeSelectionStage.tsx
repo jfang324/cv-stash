@@ -23,6 +23,7 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSel
     useEffect(() => {
         try {
             const searchResults = searchIndex(formData.jobDescription, 4)
+            console.log('Search results:', searchResults)
 
             //if a resume is already selected we want to make sure it is displayed even if it doesn't get a high fuse score
             //however, if it is part of the search results we don't want to duplicate it

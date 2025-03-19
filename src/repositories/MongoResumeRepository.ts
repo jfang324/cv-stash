@@ -34,15 +34,24 @@ const resumeSchema: Schema<ResumeDocument> = new Schema(
             required: [true, 'All resumes need a last modified date'],
         },
     },
-    { collection: 'Resumes' }
+    {
+        toObject: {
+            transform: (doc, ret) => {
+                delete ret._id
+                delete ret.__v
+                delete ret.ownerId
+
+                return ret
+            },
+        },
+        collection: 'Resumes',
+    }
 )
 
 //When a  resume is deleted, also delete all associated job applications
 resumeSchema.post('findOneAndDelete', async function (doc) {
-    if (doc) {
-        const jobApplicationsModel = mongoose.models.JobApplication
-
-        await jobApplicationsModel.deleteMany({ resume: doc.id })
+    if (doc && mongoose.models.JobApplication) {
+        await mongoose.models.JobApplication.deleteMany({ resume: doc.id })
     }
 })
 
@@ -73,9 +82,7 @@ export class MongoResumeRepository implements ResumeRepository {
         const resumeModel = ResumeModel(this.connection)
 
         try {
-            const newResume = (await resumeModel.create({ ...resume, ownerId })).toObject({
-                select: ['-_id -__v'],
-            })
+            const newResume = (await resumeModel.create({ ...resume, ownerId })).toObject()
 
             return newResume
         } catch (error) {

@@ -185,6 +185,10 @@ export default function ApplicationsPage() {
                                         <p>{selectedApplication.companyName}</p>
                                     </div>
                                     <div className="space-y-0.5">
+                                        <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                                        <p>{selectedApplication.status}</p>
+                                    </div>
+                                    <div className="space-y-0.5">
                                         <h3 className="text-sm font-medium text-muted-foreground">Resume Used</h3>
                                         <div className="flex items-center">
                                             <FileText className="h-4 w-4 mr-1 text-primary" />
@@ -200,11 +204,11 @@ export default function ApplicationsPage() {
                                 <div className="flex flex-col gap-2">
                                     <div className="space-y-0.5">
                                         <h3 className="text-sm font-medium text-muted-foreground">Applied Date</h3>
-                                        <p>{new Date(selectedApplication.lastModified).toDateString()}</p>
+                                        <p>{new Date(selectedApplication.dateApplied).toDateString()}</p>
                                     </div>
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                                        <p>{selectedApplication.status}</p>
+                                        <h3 className="text-sm font-medium text-muted-foreground">Last Modified</h3>
+                                        <p>{new Date(selectedApplication.lastModified).toDateString()}</p>
                                     </div>
                                 </div>
                             </div>

@@ -7,5 +7,6 @@ export interface JobApplication {
     jobDescription: string
     resume: Resume
     status: 'Applied' | 'Interviewing' | 'Rejected' | 'Offer' | 'Withdrawn'
+    dateApplied: number
     lastModified: number
 }
