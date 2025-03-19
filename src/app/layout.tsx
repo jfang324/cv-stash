@@ -8,6 +8,7 @@ import { Auth0Provider } from '@auth0/nextjs-auth0'
 import { Analytics } from '@vercel/analytics/react'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const geistSans = Geist({
@@ -38,6 +39,18 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            <head>
+                <Script async src="https://www.googletagmanager.com/gtag/js?id=G-RNG18ZMR27"></Script>
+                <Script>
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+
+                        gtag('config', 'G-RNG18ZMR27');
+                    `}
+                </Script>
+            </head>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <Auth0Provider>
                     <SidebarProvider defaultOpen={false}>
