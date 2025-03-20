@@ -122,7 +122,7 @@ export const calculateRecentActivity = (applications: JobApplication[], resumes:
 
     while (recentActivity.length < 5) {
         if (i < recentApplications.length && j < recentResumes.length) {
-            if (recentApplications[i].dateApplied < recentResumes[j].lastModified) {
+            if (recentApplications[i].dateApplied > recentResumes[j].lastModified) {
                 recentActivity.push(recentApplications[i])
                 i++
             } else {
