@@ -5,7 +5,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useUserMetadata } from '@/hooks/useUserMetadata'
-import { apiClient } from '@/services/ApiClient'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -18,7 +17,7 @@ const formSchema = z.object({
 })
 
 export const SettingsForm = () => {
-    const { user, refreshUserMetadata } = useUserMetadata()
+    const { user, updateUserMetadata } = useUserMetadata()
     const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -43,13 +42,11 @@ export const SettingsForm = () => {
      * Handles form submission
      */
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        try {
-            await apiClient.updateUser(data)
+        const response = await updateUserMetadata(data)
 
-            refreshUserMetadata()
+        if (response) {
             toast({ title: 'Success', description: 'Your account details have been updated' })
-        } catch (error) {
-            console.error(error)
+        } else {
             toast({ title: 'Error', description: 'There was an error updating your account details' })
         }
     }

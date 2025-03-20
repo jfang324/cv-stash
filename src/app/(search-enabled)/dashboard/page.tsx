@@ -5,37 +5,24 @@ import { RecentActivity } from '@/components/RecentActivity'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
-import { JobApplication } from '@/interfaces/JobApplication'
-import { Resume } from '@/interfaces/Resume'
+import { useJobApplications } from '@/hooks/useJobApplications'
+import { useResumes } from '@/hooks/useResumes'
 import { calculateApplicationFrequency, calculateRecentActivity, calculateResumeUploadFrequency } from '@/lib/utils'
-import { apiClient } from '@/services/ApiClient'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 export default function DashboardPage() {
-    const [resumes, setResumes] = useState<Resume[]>([])
-    const [applications, setApplications] = useState<JobApplication[]>([])
+    const { resumes, createResume, error: resumeError } = useResumes()
+    const { jobApplications, createJobApplication, error: jobApplicationError } = useJobApplications()
     const { toast } = useToast()
 
-    //TODO: make it so that if a new resume or application is added by the new application form, it will be added to the dashboard
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const fetchedResumes = await apiClient.retrieveResumes()
-                const fetchedApplications = await apiClient.retrieveJobApplications()
-
-                setResumes(fetchedResumes)
-                setApplications(fetchedApplications)
-            } catch (error) {
-                console.error(error)
-                toast({ title: 'Error', description: 'Failed to retrieve data' })
-            }
+        if (resumeError || jobApplicationError) {
+            toast({ title: 'Error', description: resumeError || jobApplicationError })
         }
-
-        fetchData()
-    }, [toast])
+    }, [resumeError, jobApplicationError, toast])
 
     return (
-        <div className="flex flex-col gap-3 h-full p-6">
+        <div className="flex flex-col h-full p-6 gap-3">
             <div className="flex flex-col gap-1">
                 <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
                 <p className="text-muted-foreground">Track your resume uploads and job applications</p>
@@ -50,7 +37,7 @@ export default function DashboardPage() {
                 <TabsContent value="overview" className="space-y-4">
                     <div className="flex flex-wrap gap-4">
                         <FrequencyChart data={calculateResumeUploadFrequency(resumes)} dataType="resumes" />
-                        <FrequencyChart data={calculateApplicationFrequency(applications)} dataType="applications" />
+                        <FrequencyChart data={calculateApplicationFrequency(jobApplications)} dataType="applications" />
                     </div>
 
                     <Card>
@@ -59,7 +46,7 @@ export default function DashboardPage() {
                             <CardDescription>Your recent resume uploads and job applications</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {calculateRecentActivity(applications, resumes).map((item) => (
+                            {calculateRecentActivity(jobApplications, resumes).map((item) => (
                                 <RecentActivity item={item} key={item.id} />
                             ))}
                         </CardContent>
@@ -73,7 +60,10 @@ export default function DashboardPage() {
                             <CardDescription>Create a new job application using your existing resumes</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <JobApplicationForm />
+                            <JobApplicationForm
+                                createJobApplication={createJobApplication}
+                                createResume={createResume}
+                            />
                         </CardContent>
                     </Card>
                 </TabsContent>

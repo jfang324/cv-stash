@@ -22,7 +22,7 @@ export const FrequencyChart = ({ data, dataType }: FrequencyChartProps) => {
     const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
         if (active && payload?.length && payload[0]) {
             return (
-                <div className="bg-background border rounded-md shadow-sm p-2 text-sm">
+                <div className="bg-background border p-2 rounded-md shadow-sm text-sm">
                     <p className="text-muted-foreground">{`Date: ${label}`}</p>
                     <p className="text-primary font-bold">{`${
                         dataType === 'applications' ? 'Applications' : 'Resumes'
@@ -38,7 +38,7 @@ export const FrequencyChart = ({ data, dataType }: FrequencyChartProps) => {
         <Card className="w-full sm:flex-1">
             <CardHeader>
                 <CardTitle>
-                    <div className="flex items-center gap-2">
+                    <div className="flex gap-2 items-center">
                         {dataType === 'applications' ? (
                             <Briefcase className="h-6 w-6" />
                         ) : (

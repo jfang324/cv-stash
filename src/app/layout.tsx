@@ -57,7 +57,7 @@ export default function RootLayout({
                         <UserMetadataProvider>
                             <AppSidebar />
                             <SidebarInset>
-                                <div className="flex flex-col min-h-screen w-full">
+                                <div className="flex flex-col w-full min-h-screen">
                                     <Header />
                                     <main className="flex-1">
                                         {children}

@@ -12,12 +12,12 @@ export const SummaryStage = ({ formData, selectedResume }: SummaryStageProps) =>
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="font-semibold flex items-center">
-                    <Briefcase className="mr-2 h-5 w-5" />
+                <h3 className="flex font-semibold items-center">
+                    <Briefcase className="h-5 w-5 mr-2" />
                     Job Details
                 </h3>
                 <Separator className="my-1" />
-                <dl className="space-y-2 mt-2 text-sm">
+                <dl className="text-sm mt-2 space-y-2">
                     <div>
                         <dt className="text-muted-foreground">Job Title</dt>
                         <dd>{formData.jobTitle}</dd>
@@ -34,13 +34,13 @@ export const SummaryStage = ({ formData, selectedResume }: SummaryStageProps) =>
             </div>
 
             <div>
-                <h3 className="font-semibold flex items-center">
-                    <FileText className="mr-2 h-5 w-5" />
+                <h3 className="flex font-semibold items-center">
+                    <FileText className="h-5 w-5 mr-2" />
                     Selected Resume
                 </h3>
                 <Separator className="my-1" />
                 {selectedResume && (
-                    <dl className="space-y-2 mt-2 text-sm">
+                    <dl className="text-sm mt-2 space-y-2">
                         <div>
                             <dt className="text-muted-foreground">Resume Name</dt>
                             <dd>{selectedResume.name}</dd>

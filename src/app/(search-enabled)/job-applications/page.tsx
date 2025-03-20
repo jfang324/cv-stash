@@ -5,53 +5,39 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
+import { useJobApplications } from '@/hooks/useJobApplications'
 import { JobApplication } from '@/interfaces/JobApplication'
 import { apiClient } from '@/services/ApiClient'
 import { Briefcase, FileText, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-export default function ApplicationsPage() {
-    const [searchQuery, setSearchQuery] = useState('')
-    const [jobApplications, setJobApplications] = useState<JobApplication[]>([])
-    const { toast } = useToast()
+export default function JobApplicationsPage() {
+    const { jobApplications, updateJobApplication, deleteJobApplication, error } = useJobApplications()
     const [selectedStatus, setSelectedStatus] = useState<JobApplication['status'] | 'All'>('All')
     const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+    const { toast } = useToast()
 
     useEffect(() => {
-        const fetchJobApplications = async () => {
-            try {
-                const jobApplications = await apiClient.retrieveJobApplications()
-
-                setJobApplications(jobApplications)
-            } catch (error) {
-                console.error(error)
-                toast({ title: 'Error', description: 'Failed to retrieve job applications' })
-            }
+        if (error) {
+            toast({ title: 'Error', description: error })
         }
+    }, [error, toast])
 
-        fetchJobApplications()
-    }, [toast])
-
-    const allStatuses: (JobApplication['status'] | 'All')[] = ['All']
-
-    for (const application of jobApplications) {
-        if (!allStatuses.includes(application.status)) {
-            allStatuses.push(application.status)
-        }
-    }
+    const allStatuses: (JobApplication['status'] | 'All')[] = [
+        'All',
+        ...new Set(jobApplications.map((app) => app.status)),
+    ]
 
     const filteredJobApplications = jobApplications.filter((application) => {
-        const jobTitleMatchesSearch = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(
-            application.jobTitle.toLowerCase()
-        )
+        const searchRegex = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 
-        const companyNameMatchesSearch = new RegExp(
-            searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        ).test(application.companyName.toLowerCase())
+        const jobTitleMatchesSearch = searchRegex.test(application.jobTitle.toLowerCase())
+        const companyNameMatchesSearch = searchRegex.test(application.companyName.toLowerCase())
 
         const matchesSearch = jobTitleMatchesSearch || companyNameMatchesSearch
-        const matchesStatus = selectedStatus === 'All' ? true : application.status === selectedStatus
+        const matchesStatus = selectedStatus === 'All' || application.status === selectedStatus
 
         return matchesSearch && matchesStatus
     })
@@ -66,42 +52,13 @@ export default function ApplicationsPage() {
     }
 
     /**
-     * Handles the deletion of a job application
-     * @param application - The job application to delete
+     * Handles the preview of the resume associated with the selected job application
      */
-    const handleDelete = async (application: JobApplication) => {
-        try {
-            const deletedApplication = await apiClient.deleteJobApplication(application.id)
-
-            setJobApplications((prev) => prev.filter((app) => app.id !== deletedApplication.id))
-        } catch (error) {
-            console.error(error)
-            toast({ title: 'Error', description: 'Failed to delete job application' })
-        }
-    }
-
-    /**
-     * Handles the update of a job application
-     * @param application - The job application to update
-     */
-    const handleUpdate = async (application: JobApplication) => {
-        try {
-            const updatedApplication = await apiClient.updateJobApplication(application.id, application)
-
-            setJobApplications((prev) =>
-                prev.map((app) => (app.id === updatedApplication.id ? updatedApplication : app))
-            )
-        } catch (error) {
-            console.error(error)
-            toast({ title: 'Error', description: 'Failed to update job application' })
-        }
-    }
-
     const handlePreviewResume = async () => {
         if (!selectedApplication?.resume) return
 
         try {
-            const presignedUrl = await apiClient.retrievePresignedUrl(selectedApplication.resume.id)
+            const presignedUrl = await apiClient.getPresignedUrl(selectedApplication.resume)
 
             window.open(presignedUrl, '_blank')
         } catch (error) {
@@ -111,15 +68,15 @@ export default function ApplicationsPage() {
     }
 
     return (
-        <div className="flex flex-col gap-3 h-full p-6">
+        <div className="flex flex-col h-full p-6 gap-3">
             <div className="flex flex-col gap-1">
                 <h2 className="text-3xl font-bold tracking-tight">Job Applications</h2>
                 <p className="text-muted-foreground">Manage your job applications</p>
             </div>
             <div className="space-y-3">
                 <div className="flex gap-2">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <div className="flex-1 relative">
+                        <Search className="h-4 text-muted-foreground w-4 -translate-y-1/2 absolute left-3 top-1/2" />
                         <Input
                             placeholder="Search resumes..."
                             className="pl-10"
@@ -146,8 +103,8 @@ export default function ApplicationsPage() {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">
+                <div className="flex justify-between items-center">
+                    <p className="text-muted-foreground text-sm">
                         Showing <span className="font-medium">{jobApplications.length}</span> of{' '}
                         <span className="font-medium">{jobApplications.length}</span> job applications
                     </p>
@@ -159,8 +116,8 @@ export default function ApplicationsPage() {
                             key={application.id}
                             jobApplication={application}
                             handlePreview={handlePreview}
-                            handleDelete={handleDelete}
-                            handleUpdate={handleUpdate}
+                            handleDelete={deleteJobApplication}
+                            handleUpdate={updateJobApplication}
                         />
                     ))}
                 </div>
@@ -169,7 +126,7 @@ export default function ApplicationsPage() {
                     <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
                         <DialogContent className="max-w-3xl">
                             <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
+                                <DialogTitle className="flex gap-2 items-center">
                                     <Briefcase className="h-5 w-5" />
                                     {selectedApplication.jobTitle}
                                 </DialogTitle>
@@ -178,22 +135,22 @@ export default function ApplicationsPage() {
 
                             <Separator />
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+                            <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Company</h3>
+                                        <h3 className="text-muted-foreground text-sm font-medium">Company</h3>
                                         <p>{selectedApplication.companyName}</p>
                                     </div>
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                                        <h3 className="text-muted-foreground text-sm font-medium">Status</h3>
                                         <p>{selectedApplication.status}</p>
                                     </div>
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Resume Used</h3>
+                                        <h3 className="text-muted-foreground text-sm font-medium">Resume Used</h3>
                                         <div className="flex items-center">
-                                            <FileText className="h-4 w-4 mr-1 text-primary" />
+                                            <FileText className="h-4 text-primary w-4 mr-1" />
                                             <p
-                                                className="hover:underline hover:cursor-pointer"
+                                                className="hover:cursor-pointer hover:underline"
                                                 onClick={handlePreviewResume}
                                             >
                                                 {selectedApplication.resume.name}
@@ -203,11 +160,11 @@ export default function ApplicationsPage() {
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Applied Date</h3>
+                                        <h3 className="text-muted-foreground text-sm font-medium">Applied Date</h3>
                                         <p>{new Date(selectedApplication.dateApplied).toDateString()}</p>
                                     </div>
                                     <div className="space-y-0.5">
-                                        <h3 className="text-sm font-medium text-muted-foreground">Last Modified</h3>
+                                        <h3 className="text-muted-foreground text-sm font-medium">Last Modified</h3>
                                         <p>{new Date(selectedApplication.lastModified).toDateString()}</p>
                                     </div>
                                 </div>

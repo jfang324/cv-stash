@@ -43,13 +43,13 @@ export const JobApplicationCard = ({
         <Card>
             <CardHeader>
                 <div className="flex flex-col gap-2">
-                    <div className="flex-1 flex flex-row gap-4 justify-between">
+                    <div className="flex flex-1 flex-row justify-between gap-4">
                         <div className="space-y-2">
                             <CardTitle className="flex flex-row">
-                                <Briefcase className="mr-2 h-4 w-4" />
+                                <Briefcase className="h-4 w-4 mr-2" />
                                 <span className="font-bold">{jobApplication.jobTitle}</span>
                             </CardTitle>
-                            <CardDescription className="flex items-center gap-2 text-xs">
+                            <CardDescription className="flex text-xs gap-2 items-center">
                                 {jobApplication.companyName}
                             </CardDescription>
                         </div>
@@ -58,7 +58,7 @@ export const JobApplicationCard = ({
                         </div>
                     </div>
 
-                    <div className="flex-1 flex justify-between items-center gap-4 sm:gap-6">
+                    <div className="flex flex-1 justify-between gap-4 items-center sm:gap-6">
                         <div className="text-muted-foreground text-xs line-clamp-2">
                             {jobApplication.jobDescription}
                         </div>
@@ -94,7 +94,7 @@ export const JobApplicationCard = ({
                                             {/* Hack to make the select trigger look like a pencil icon */}
                                             <Button variant={'outline'} size={'icon'} className="h-8 w-8" asChild>
                                                 <div className="hover:cursor-pointer">
-                                                    <SelectTrigger className="absolute h-8 w-8 text-background focus:ring-0" />
+                                                    <SelectTrigger className="h-8 text-background w-8 absolute focus:ring-0" />
                                                     <Pencil className="h-4 w-4" />
                                                 </div>
                                             </Button>

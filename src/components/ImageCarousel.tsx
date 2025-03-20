@@ -24,7 +24,7 @@ export const ImageCarousel = ({ images }: ImageCarouselProps) => {
                         <Image
                             src={image}
                             alt={image}
-                            className="rounded-md mx-auto border border-black"
+                            className="border border-black rounded-md mx-auto"
                             height={400}
                             width={700}
                             quality={100}

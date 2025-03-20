@@ -13,9 +13,10 @@ import { useEffect, useState } from 'react'
 interface ResumeSelectionStageProps {
     formData: JobApplicationFormFields
     handleResumeSelect: (selectedResume: Resume) => void
+    createResume: (file: File, name: string) => Promise<Resume | null>
 }
 
-export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSelectionStageProps) => {
+export const ResumeSelectionStage = ({ formData, handleResumeSelect, createResume }: ResumeSelectionStageProps) => {
     const [resumes, setResumes] = useState<Resume[]>([])
     const { searchIndex } = useSearchIndex()
     const { toast } = useToast()
@@ -41,7 +42,7 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSel
      */
     const handlePreview = async (resume: Resume) => {
         try {
-            const presignedUrl = await apiClient.retrievePresignedUrl(resume.id)
+            const presignedUrl = await apiClient.getPresignedUrl(resume)
 
             window.open(presignedUrl, '_blank')
         } catch (error) {
@@ -70,18 +71,18 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSel
                             formData.resume?.id === resume.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
                         }`}
                     >
-                        <div className="flex items-start justify-between">
+                        <div className="flex justify-between items-start">
                             <div className="cursor-pointer" onClick={() => handleResumeSelect(resume)}>
-                                <h3 className="font-semibold text-sm flex items-center">
+                                <h3 className="flex text-sm font-semibold items-center">
                                     {resume.name}
                                     {formData.resume?.id === resume.id && (
-                                        <CheckCircle className="h-4 w-4 text-primary ml-2" />
+                                        <CheckCircle className="h-4 text-primary w-4 ml-2" />
                                     )}
                                 </h3>
-                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{resume.textContent}</p>
+                                <p className="text-muted-foreground text-xs line-clamp-2 mt-1">{resume.textContent}</p>
                             </div>
 
-                            <div className="flex items-center space-x-2 ml-4 my-auto">
+                            <div className="flex items-center ml-4 my-auto space-x-2">
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
@@ -105,7 +106,7 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect }: ResumeSel
                     </div>
                 ))}
             </div>
-            <ResumeUploadDialog callBack={uploadCallback} />
+            <ResumeUploadDialog handleResumeUpload={createResume} callBack={uploadCallback} />
         </div>
     )
 }

@@ -1,4 +1,3 @@
-'use client'
 import { JobDetailsStage } from '@/components/job-application-stages/JobDetailsStage'
 import { ResumeSelectionStage } from '@/components/job-application-stages/ResumeSelectionStage'
 import { SummaryStage } from '@/components/job-application-stages/SummaryStage'
@@ -8,18 +7,22 @@ import { useToast } from '@/hooks/use-toast'
 import { JobApplication } from '@/interfaces/JobApplication'
 import { JobApplicationFormFields } from '@/interfaces/JobApplicationFormFields'
 import { Resume } from '@/interfaces/Resume'
-import { apiClient } from '@/services/ApiClient'
 import { Briefcase, CheckCircle, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { useState } from 'react'
 
-export const JobApplicationForm = () => {
-    const [stage, setStage] = useState<number>(1)
+interface JobApplicationFormProps {
+    createJobApplication: (formData: JobApplicationFormFields) => Promise<JobApplication | null>
+    createResume: (file: File, name: string) => Promise<Resume | null>
+}
+
+export const JobApplicationForm = ({ createJobApplication, createResume }: JobApplicationFormProps) => {
     const [formData, setFormData] = useState<JobApplicationFormFields>({
         jobTitle: '',
         companyName: '',
         jobDescription: '',
         resume: null,
     })
+    const [stage, setStage] = useState<number>(1)
     const { toast } = useToast()
 
     /**
@@ -84,9 +87,11 @@ export const JobApplicationForm = () => {
             return
         }
 
-        try {
-            await apiClient.createJobApplication(formData as Omit<JobApplication, 'id' | 'lastModified'>)
+        const createdJobApplication = await createJobApplication(
+            formData as Omit<JobApplication, 'id' | 'dateApplied' | 'lastModified'>
+        )
 
+        if (createdJobApplication) {
             setStage(1)
             setFormData({
                 jobTitle: '',
@@ -95,9 +100,6 @@ export const JobApplicationForm = () => {
                 resume: null,
             })
             toast({ title: 'Success', description: 'Your application has been submitted' })
-        } catch (error) {
-            console.error(error)
-            toast({ title: 'Error', description: 'There was an error submitting your application' })
         }
     }
 
@@ -115,7 +117,13 @@ export const JobApplicationForm = () => {
             title: 'Select Resume',
             description: 'Select a resume that best matches this job',
             icon: FileText,
-            content: <ResumeSelectionStage formData={formData} handleResumeSelect={handleResumeSelect} />,
+            content: (
+                <ResumeSelectionStage
+                    formData={formData}
+                    handleResumeSelect={handleResumeSelect}
+                    createResume={createResume}
+                />
+            ),
         },
         3: {
             id: 3,
@@ -127,10 +135,10 @@ export const JobApplicationForm = () => {
     }
 
     return (
-        <div className="container mx-auto max-w-3xl">
+        <div className="container max-w-3xl mx-auto">
             <Card>
                 <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex justify-between items-center mb-2">
                         <CardTitle className="text-2xl">{stages[stage as keyof typeof stages].title}</CardTitle>
 
                         <div className="flex items-center">
@@ -172,7 +180,7 @@ export const JobApplicationForm = () => {
                 <CardFooter className="flex justify-between">
                     {stage > 1 ? (
                         <Button variant="outline" onClick={handlePrev}>
-                            <ChevronLeft className="mr-2 h-4 w-4" />
+                            <ChevronLeft className="h-4 w-4 mr-2" />
                             Back
                         </Button>
                     ) : (
@@ -182,7 +190,7 @@ export const JobApplicationForm = () => {
                     {stage < 3 ? (
                         <Button onClick={handleNext} disabled={!isStageValid()}>
                             Next
-                            <ChevronRight className="ml-2 h-4 w-4" />
+                            <ChevronRight className="h-4 w-4 ml-2" />
                         </Button>
                     ) : (
                         <Button onClick={handleSubmit}>Submit Application</Button>
