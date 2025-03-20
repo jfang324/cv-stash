@@ -4,18 +4,18 @@ import Link from 'next/link'
 
 export const Footer = () => {
     return (
-        <footer className="flex h-14 items-center gap-4 border-t bg-background px-4 sm:px-6 justify-center sm:justify-end">
+        <footer className="flex bg-background border-t h-14 justify-center gap-4 items-center px-4 sm:justify-end sm:px-6">
             <nav className="flex gap-4 sm:gap-6">
-                <Link className="w-5 h-5" href={SOCIAL_LINKS.github} target="_blank">
-                    <Github className="w-5 h-5" />
+                <Link className="h-5 w-5" href={SOCIAL_LINKS.github} target="_blank">
+                    <Github className="h-5 w-5" />
                     <span className="sr-only">GitHub</span>
                 </Link>
-                <Link className="w-5 h-5" href={SOCIAL_LINKS.linkedin} target="_blank">
-                    <Linkedin className="w-5 h-5" />
+                <Link className="h-5 w-5" href={SOCIAL_LINKS.linkedin} target="_blank">
+                    <Linkedin className="h-5 w-5" />
                     <span className="sr-only">LinkedIn</span>
                 </Link>
-                <Link className="w-5 h-5" href={`mailto:${SOCIAL_LINKS.email}`} target="_blank">
-                    <Mail className="w-5 h-5" />
+                <Link className="h-5 w-5" href={`mailto:${SOCIAL_LINKS.email}`} target="_blank">
+                    <Mail className="h-5 w-5" />
                     <span className="sr-only">Email</span>
                 </Link>
             </nav>

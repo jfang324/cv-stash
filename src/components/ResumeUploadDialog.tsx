@@ -11,10 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { useSearchIndex } from '@/hooks/useSearchIndex'
 import { Resume } from '@/interfaces/Resume'
-import { parsePdf } from '@/lib/utils'
-import { apiClient } from '@/services/ApiClient'
 import { Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Document, Page } from 'react-pdf'
@@ -22,14 +19,14 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
 interface ResumeUploadDialogProps {
-    callBack: (resume: Resume) => void
+    handleResumeUpload: (file: File, name: string) => Promise<Resume | null>
+    callBack?: (resume: Resume) => void
 }
 
-export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
-    const [file, setFile] = useState<File | undefined>()
+export const ResumeUploadDialog = ({ handleResumeUpload, callBack = () => {} }: ResumeUploadDialogProps) => {
     const [resumeName, setResumeName] = useState<string>()
+    const [file, setFile] = useState<File | undefined>()
     const { toast } = useToast()
-    const { addToIndex } = useSearchIndex()
 
     const secretInputRef = useRef<HTMLInputElement>(null)
 
@@ -74,18 +71,12 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
             return
         }
 
-        try {
-            const textContent = await parsePdf(file)
-            const response = await apiClient.uploadResume(file, resumeName, textContent)
+        const response = await handleResumeUpload(file, resumeName)
 
-            if (response) {
-                addToIndex(response)
-                toast({ title: 'Success', description: 'Resume uploaded successfully' })
-                callBack(response)
-            }
-        } catch (error) {
-            console.error(error)
-            toast({ title: 'Error', description: 'Failed to upload resume' })
+        if (response) {
+            callBack(response)
+            setFile(undefined)
+            setResumeName('')
         }
     }
 
@@ -98,7 +89,7 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="flex flex-col justify-center items-center gap-2 sm:px-10">
+            <DialogContent className="flex flex-col justify-center gap-2 items-center sm:px-10">
                 <DialogHeader>
                     <DialogTitle>Upload a New Resume</DialogTitle>
                     <DialogDescription className="text-muted-foreground text-xs">
@@ -108,7 +99,7 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
 
                 {!file ? (
                     <Button
-                        className="w-full text-muted-foreground"
+                        className="text-muted-foreground w-full"
                         variant={'outline'}
                         onClick={() => {
                             secretInputRef.current?.click()
@@ -130,7 +121,7 @@ export const ResumeUploadDialog = ({ callBack }: ResumeUploadDialogProps) => {
                 )}
 
                 <DialogFooter className={`w-full ${!file ? 'hidden' : ''}`}>
-                    <div className="flex flex-col gap-1.5 w-full">
+                    <div className="flex flex-col w-full gap-1.5">
                         <Input
                             className="border border-black"
                             placeholder="Enter a resume name"

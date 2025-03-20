@@ -1,7 +1,7 @@
-import { UserMetadataContext } from '@/components/UserMetadataProvider'
+import { UserMetadataContext, UserMetadataContextType } from '@/components/UserMetadataProvider'
 import { useContext } from 'react'
 
-export const useUserMetadata = () => {
+export const useUserMetadata = (): UserMetadataContextType => {
     const userMetadataContext = useContext(UserMetadataContext)
 
     if (!userMetadataContext) {

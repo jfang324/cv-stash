@@ -1,4 +1,5 @@
 import { JobApplication } from '@/interfaces/JobApplication'
+import { JobApplicationFormFields } from '@/interfaces/JobApplicationFormFields'
 import { Resume } from '@/interfaces/Resume'
 import { User } from '@/interfaces/User'
 import axios, { AxiosInstance } from 'axios'
@@ -38,7 +39,7 @@ export class ApiClient {
      * @param textContent - the text content of the resume
      * @returns a resume object containing the uploaded resume's details
      */
-    async uploadResume(resume: File, resumeName: string, textContent: string): Promise<Resume> {
+    async createResume(resume: File, resumeName: string, textContent: string): Promise<Resume> {
         if (!resume) {
             throw new Error('No resume provided')
         }
@@ -60,7 +61,7 @@ export class ApiClient {
      * Sends a GET request to /api/resumes to retrieve all resumes
      * @returns an array of all resume objects associated with the user
      */
-    async retrieveResumes(): Promise<Resume[]> {
+    async getResumes(): Promise<Resume[]> {
         const response = await this.httpClient.get('/api/resumes')
 
         return response.data
@@ -68,21 +69,22 @@ export class ApiClient {
 
     /**
      * Sends a GET request to /api/resumes/:resumeId to retrieve a preSignedUrl the associated resume
-     * @param resumeId - the ID of the resume to retrieve
+     * @param resume - the resume object to retrieve
      * @returns a preSignedUrl for the resume
      */
-    async retrievePresignedUrl(resumeId: string): Promise<string> {
-        const response = await this.httpClient.get(`/api/resumes/${resumeId}`)
+    async getPresignedUrl(resume: Resume): Promise<string> {
+        const response = await this.httpClient.get(`/api/resumes/${resume.id}`)
 
         return response.data.url
     }
 
     /**
-     * Sends a GET request to /api/job-applications to retrieve all job applications
-     * @returns an array of all job applications associated with the user
+     * Sends a DELETE request to /api/resumes/:resumeId to delete a resume
+     * @param resume - the resume object to delete
+     * @returns the deleted resume object
      */
-    async retrieveJobApplications(): Promise<JobApplication[]> {
-        const response = await this.httpClient.get('/api/job-applications')
+    async deleteResume(resume: Resume): Promise<Resume> {
+        const response = await this.httpClient.delete(`/api/resumes/${resume.id}`)
 
         return response.data
     }
@@ -92,45 +94,40 @@ export class ApiClient {
      * @param jobApplication - the job application object to create
      * @returns the created job application object
      */
-    async createJobApplication(jobApplication: Omit<JobApplication, 'id' | 'lastModified'>): Promise<JobApplication> {
+    async createJobApplication(jobApplication: JobApplicationFormFields): Promise<JobApplication> {
         const response = await this.httpClient.post('/api/job-applications', jobApplication)
 
         return response.data
     }
 
     /**
-     * Sends a DELETE request to /api/resumes/:resumeId to delete a resume
-     * @param resumeId - the ID of the resume to delete
-     * @returns the deleted resume object
+     * Sends a GET request to /api/job-applications to retrieve all job applications
+     * @returns an array of all job applications associated with the user
      */
-    async deleteResume(resumeId: string): Promise<Resume> {
-        const response = await this.httpClient.delete(`/api/resumes/${resumeId}`)
+    async getJobApplications(): Promise<JobApplication[]> {
+        const response = await this.httpClient.get('/api/job-applications')
+
+        return response.data
+    }
+
+    /**'
+     * Sends a PUT request to /api/job-applications/:jobApplicationId to update a job application
+     * @param jobApplication - the job application object to update
+     * @returns the updated job application object
+     */
+    async updateJobApplication(jobApplication: JobApplication): Promise<JobApplication> {
+        const response = await this.httpClient.put(`/api/job-applications/${jobApplication.id}`, jobApplication)
 
         return response.data
     }
 
     /**
      * Sends a DELETE request to /api/job-applications/:jobApplicationId to delete a job application
-     * @param jobApplicationId - the ID of the job application to delete
+     * @param jobApplication - the job application object to delete
      * @returns the deleted job application object
      */
-    async deleteJobApplication(jobApplicationId: string): Promise<JobApplication> {
-        const response = await this.httpClient.delete(`/api/job-applications/${jobApplicationId}`)
-
-        return response.data
-    }
-
-    /**
-     * Sends a PUT request to /api/job-applications/:jobApplicationId to update a job application
-     * @param jobApplicationId - the ID of the job application to update
-     * @param updatedFields - the updated fields of the job application
-     * @returns the updated job application object
-     */
-    async updateJobApplication(
-        jobApplicationId: string,
-        updatedFields: Partial<JobApplication>
-    ): Promise<JobApplication> {
-        const response = await this.httpClient.put(`/api/job-applications/${jobApplicationId}`, updatedFields)
+    async deleteJobApplication(jobApplication: JobApplication): Promise<JobApplication> {
+        const response = await this.httpClient.delete(`/api/job-applications/${jobApplication.id}`)
 
         return response.data
     }

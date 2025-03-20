@@ -71,12 +71,12 @@ export const AppSidebar = () => {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/">
-                                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                                <div className="flex bg-primary justify-center rounded-lg text-primary-foreground aspect-square items-center size-8">
                                     <FileText className="size-4" />
                                 </div>
                                 <div className="flex flex-col gap-0.5 leading-none">
                                     <span className="font-semibold">CV Stash</span>
-                                    <span className="text-xs text-muted-foreground">Manage your resumes</span>
+                                    <span className="text-muted-foreground text-xs">Manage your resumes</span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
@@ -95,7 +95,7 @@ export const AppSidebar = () => {
                                         isActive={pathname === item.href || pathname?.startsWith(`${item.href}/`)}
                                     >
                                         <Link href={item.href}>
-                                            <item.icon className="mr-2 h-4 w-4" />
+                                            <item.icon className="h-4 w-4 mr-2" />
                                             <span>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
@@ -108,7 +108,7 @@ export const AppSidebar = () => {
                                 <Button variant="outline" asChild>
                                     <a href="/auth/login?returnTo=/dashboard">
                                         Login
-                                        <LogIn className="ml-2 h-4 w-4" />
+                                        <LogIn className="h-4 w-4 ml-2" />
                                     </a>
                                 </Button>
                             </SidebarMenuButton>
@@ -124,35 +124,35 @@ export const AppSidebar = () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <SidebarMenuButton>
-                                        <Avatar className="h-6 w-6 mr-2 border">
+                                        <Avatar className="border h-6 w-6 mr-2">
                                             <AvatarImage src={user.profilePicture} alt="User" />
                                             <AvatarFallback>JD</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col text-left">
                                             <span className="text-sm">{`${user.firstName} ${user.lastName}`}</span>
-                                            <span className="text-xs text-muted-foreground">{user.email}</span>
+                                            <span className="text-muted-foreground text-xs">{user.email}</span>
                                         </div>
-                                        <ChevronDown className="ml-auto h-4 w-4" />
+                                        <ChevronDown className="h-4 w-4 ml-auto" />
                                     </SidebarMenuButton>
                                 </DropdownMenuTrigger>
 
                                 <DropdownMenuContent align="end" className="w-56">
                                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                                         <Link href="/settings">
-                                            <User className="mr-2 h-4 w-4" />
+                                            <User className="h-4 w-4 mr-2" />
                                             <span>My Profile</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                                         <Link href="/settings">
-                                            <Settings className="mr-2 h-4 w-4" />
+                                            <Settings className="h-4 w-4 mr-2" />
                                             <span>Account Settings</span>
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem className="hover:cursor-pointer" asChild>
                                         <a href="/auth/logout">
-                                            <LogOut className="mr-2 h-4 w-4" />
+                                            <LogOut className="h-4 w-4 mr-2" />
                                             <span>Log out</span>
                                         </a>
                                     </DropdownMenuItem>

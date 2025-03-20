@@ -20,9 +20,9 @@ export const RecentActivity = ({ item }: RecentActivityProps) => {
     }
 
     return (
-        <div className="flex items-center p-3 border rounded-lg">
+        <div className="flex border p-3 rounded-lg items-center">
             {itemType === 'resume' ? (
-                <div className="flex flex-row gap-1 w-full">
+                <div className="flex flex-row w-full gap-1">
                     <FileText className="h-6 w-6 mr-2 my-auto" />
                     <div className="flex flex-col">
                         <h1 className="text-sm font-semibold">{`Uploaded resume: ${(item as Resume).name}`}</h1>
@@ -32,7 +32,7 @@ export const RecentActivity = ({ item }: RecentActivityProps) => {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-row gap-1 w-full">
+                <div className="flex flex-row w-full gap-1">
                     <Briefcase className="h-6 w-6 mr-2 my-auto" />
                     <div className="flex flex-col">
                         <h1 className="text-sm font-semibold">{`Applied to: ${(item as JobApplication).companyName} • ${

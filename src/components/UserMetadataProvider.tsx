@@ -11,7 +11,7 @@ interface UserMetadataProviderProps {
 export interface UserMetadataContextType {
     user: User | null
     isLoading: boolean
-    refreshUserMetadata: () => Promise<void>
+    updateUserMetadata: (updatedFields: Partial<User>) => Promise<User | null>
 }
 
 export const UserMetadataContext = createContext<UserMetadataContextType | null>(null)
@@ -24,9 +24,9 @@ export const UserMetadataProvider = ({ children }: UserMetadataProviderProps) =>
         const fetchUserMetadata = async () => {
             if (!isLoading && user) {
                 try {
-                    const userMetadata = await apiClient.initializeUser()
+                    const fetchedUserMetadata = await apiClient.initializeUser()
 
-                    setUserMetadata(userMetadata)
+                    setUserMetadata(fetchedUserMetadata)
                 } catch (error) {
                     console.error(error)
                 }
@@ -37,15 +37,21 @@ export const UserMetadataProvider = ({ children }: UserMetadataProviderProps) =>
     }, [user, isLoading])
 
     /**
-     * Refreshes the user metadata
+     * Updates the user metadata
+     * @param updatedFields - the updated fields of the user
+     * @returns
      */
-    const refreshUserMetadata = useCallback(async () => {
+    const updateUserMetadata = useCallback(async (updatedFields: Partial<User>): Promise<User | null> => {
         try {
-            const freshUserMetadata = await apiClient.initializeUser()
+            const updatedUserMetadata = await apiClient.updateUser(updatedFields)
 
-            setUserMetadata(freshUserMetadata)
+            setUserMetadata(updatedUserMetadata)
+
+            return updatedUserMetadata
         } catch (error) {
             console.error(error)
+
+            return null
         }
     }, [])
 
@@ -53,9 +59,9 @@ export const UserMetadataProvider = ({ children }: UserMetadataProviderProps) =>
         () => ({
             user: userMetadata,
             isLoading,
-            refreshUserMetadata,
+            updateUserMetadata,
         }),
-        [userMetadata, isLoading, refreshUserMetadata]
+        [userMetadata, isLoading, updateUserMetadata]
     )
 
     return <UserMetadataContext.Provider value={contextValue}>{children}</UserMetadataContext.Provider>

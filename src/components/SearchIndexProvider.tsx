@@ -34,7 +34,7 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
         const initializeIndex = async () => {
             if (!isLoading && user) {
                 try {
-                    const resumes = await apiClient.retrieveResumes()
+                    const resumes = await apiClient.getResumes()
 
                     setIndex(
                         new Fuse(resumes, {
