@@ -18,7 +18,7 @@ interface ResumeSelectionStageProps {
 
 export const ResumeSelectionStage = ({ formData, handleResumeSelect, createResume }: ResumeSelectionStageProps) => {
     const [resumes, setResumes] = useState<Resume[]>([])
-    const { searchIndex } = useSearchIndex()
+    const { searchIndex, addToIndex } = useSearchIndex()
     const { toast } = useToast()
 
     useEffect(() => {
@@ -59,6 +59,7 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect, createResum
         handleResumeSelect(resume)
 
         setResumes((prev) => [...prev, resume])
+        addToIndex(resume)
     }
 
     return (
