@@ -14,7 +14,7 @@ export default function HelpPage() {
             </div>
 
             <Tabs defaultValue="faq">
-                <TabsList className="grid grid-cols-2 w-full md:grid-cols-4 md:w-auto">
+                <TabsList className="grid grid-cols-2 w-full md:grid-cols-4 md:w-auto h-fit">
                     <TabsTrigger value="faq" className="flex gap-2 items-center">
                         <HelpCircle className="h-4 w-4" />
                         <span className="hidden sm:inline">FAQ</span>

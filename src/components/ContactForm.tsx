@@ -9,8 +9,8 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 const formSchema = z.object({
-    firstName: z.string().min(1, 'First name is required'),
-    lastName: z.string().min(1, 'Last name is required'),
+    name: z.string().min(1, 'Name is required'),
+    email: z.string().email('Valid email is required').min(1, 'Email is required'),
     subject: z.string().min(1, 'Subject is required'),
     message: z.string().min(1, 'Message is required'),
 })
@@ -20,8 +20,8 @@ export function ContactForm() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            firstName: '',
-            lastName: '',
+            name: '',
+            email: '',
             subject: '',
             message: '',
         },
@@ -39,12 +39,12 @@ export function ContactForm() {
                     <div className="flex flex-row flex-wrap justify-between w-full gap-3">
                         <FormField
                             control={form.control}
-                            name="firstName"
+                            name="name"
                             render={({ field }) => (
                                 <FormItem className="flex-1 min-w-[300px] space-y-0.5">
-                                    <FormLabel className="font-semibold">First Name</FormLabel>
+                                    <FormLabel className="font-semibold">Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="John" {...field} />
+                                        <Input placeholder="John Doe" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -52,12 +52,12 @@ export function ContactForm() {
                         />
                         <FormField
                             control={form.control}
-                            name="lastName"
+                            name="email"
                             render={({ field }) => (
                                 <FormItem className="flex-1 min-w-[300px] space-y-0.5">
-                                    <FormLabel className="font-semibold">Last Name</FormLabel>
+                                    <FormLabel className="font-semibold">Email</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Doe" {...field} />
+                                        <Input placeholder="John.Doe@example.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
