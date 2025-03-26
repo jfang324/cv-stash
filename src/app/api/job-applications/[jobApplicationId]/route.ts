@@ -2,34 +2,34 @@ import { getJobApplicationService, handleError, validateSessionAndGetUser } from
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ jobApplicationId: string }> }) {
-    try {
-        const user = await validateSessionAndGetUser(['sub'])
-        const jobApplicationService = await getJobApplicationService()
-        const { jobApplicationId } = await params
-        const body = await request.json()
+	try {
+		const user = await validateSessionAndGetUser(['sub'])
+		const jobApplicationService = await getJobApplicationService()
+		const { jobApplicationId } = await params
+		const body = await request.json()
 
-        const updatedJobApplication = await jobApplicationService.updateJobApplicationById(
-            jobApplicationId,
-            { ...body },
-            user.sub
-        )
+		const updatedJobApplication = await jobApplicationService.updateJobApplicationById(
+			jobApplicationId,
+			body,
+			user.sub
+		)
 
-        return NextResponse.json(updatedJobApplication, { status: 200 })
-    } catch (error: any) {
-        return handleError(error)
-    }
+		return NextResponse.json(updatedJobApplication, { status: 200 })
+	} catch (error) {
+		return handleError(error, 'Error updating job application')
+	}
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ jobApplicationId: string }> }) {
-    try {
-        const user = await validateSessionAndGetUser(['sub'])
-        const jobApplicationService = await getJobApplicationService()
-        const { jobApplicationId } = await params
+	try {
+		const user = await validateSessionAndGetUser(['sub'])
+		const jobApplicationService = await getJobApplicationService()
+		const { jobApplicationId } = await params
 
-        const deletedJobApplication = await jobApplicationService.deleteJobApplicationById(jobApplicationId, user.sub)
+		const deletedJobApplication = await jobApplicationService.deleteJobApplicationById(jobApplicationId, user.sub)
 
-        return NextResponse.json(deletedJobApplication, { status: 200 })
-    } catch (error: any) {
-        return handleError(error)
-    }
+		return NextResponse.json(deletedJobApplication, { status: 200 })
+	} catch (error) {
+		return handleError(error, 'Error deleting job application')
+	}
 }

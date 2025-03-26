@@ -9,92 +9,92 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
 const formSchema = z.object({
-    name: z.string().min(1, 'Name is required'),
-    email: z.string().email('Valid email is required').min(1, 'Email is required'),
-    subject: z.string().min(1, 'Subject is required'),
-    message: z.string().min(1, 'Message is required'),
+	name: z.string().min(1, 'Name is required'),
+	email: z.string().email('Valid email is required').min(1, 'Email is required'),
+	subject: z.string().min(1, 'Subject is required'),
+	message: z.string().min(1, 'Message is required')
 })
 
 export function ContactForm() {
-    const { toast } = useToast()
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-            email: '',
-            subject: '',
-            message: '',
-        },
-    })
+	const { toast } = useToast()
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
+		defaultValues: {
+			name: '',
+			email: '',
+			subject: '',
+			message: ''
+		}
+	})
 
-    const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        console.log(data)
-        toast({ title: 'Success', description: 'Your message has been sent' })
-    }
+	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+		console.log(data)
+		toast({ title: 'Success', description: 'Your message has been sent' })
+	}
 
-    return (
-        <div className="border p-6 rounded-lg max-w-3xl mx-auto">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-                    <div className="flex flex-row flex-wrap justify-between w-full gap-3">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem className="flex-1 min-w-[300px] space-y-0.5">
-                                    <FormLabel className="font-semibold">Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="John Doe" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem className="flex-1 min-w-[300px] space-y-0.5">
-                                    <FormLabel className="font-semibold">Email</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="John.Doe@example.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <FormField
-                        control={form.control}
-                        name="subject"
-                        render={({ field }) => (
-                            <FormItem className="space-y-0.5">
-                                <FormLabel className="font-semibold">Subject</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Subject" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                            <FormItem className="space-y-0.5">
-                                <FormLabel className="font-semibold">Message</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Message" {...field} className="min-h-[150px]" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <div className="flex justify-end pt-2">
-                        <Button type="submit">Save Changes</Button>
-                    </div>
-                </form>
-            </Form>
-        </div>
-    )
+	return (
+		<div className="border p-6 rounded-lg max-w-3xl mx-auto">
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+					<div className="flex flex-row flex-wrap justify-between w-full gap-3">
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem className="flex-1 min-w-[300px] space-y-0.5">
+									<FormLabel className="font-semibold">Name</FormLabel>
+									<FormControl>
+										<Input placeholder="John Doe" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="email"
+							render={({ field }) => (
+								<FormItem className="flex-1 min-w-[300px] space-y-0.5">
+									<FormLabel className="font-semibold">Email</FormLabel>
+									<FormControl>
+										<Input placeholder="John.Doe@example.com" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+					<FormField
+						control={form.control}
+						name="subject"
+						render={({ field }) => (
+							<FormItem className="space-y-0.5">
+								<FormLabel className="font-semibold">Subject</FormLabel>
+								<FormControl>
+									<Input placeholder="Subject" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="message"
+						render={({ field }) => (
+							<FormItem className="space-y-0.5">
+								<FormLabel className="font-semibold">Message</FormLabel>
+								<FormControl>
+									<Textarea placeholder="Message" {...field} className="min-h-[150px]" />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<div className="flex justify-end pt-2">
+						<Button type="submit">Save Changes</Button>
+					</div>
+				</form>
+			</Form>
+		</div>
+	)
 }

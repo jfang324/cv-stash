@@ -1,130 +1,133 @@
 'use client'
-import { Resume } from '@/interfaces/Resume'
 import { apiClient } from '@/services/ApiClient'
+import type { Resume } from '@/types/Resume'
 import { useUser } from '@auth0/nextjs-auth0'
 import Fuse from 'fuse.js'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { removeStopwords } from 'stopword'
 
 interface SearchIndexProviderProps {
-    children: React.ReactNode
+	children: React.ReactNode
 }
 
 export interface SearchIndexContextType {
-    addToIndex: (resume: Resume) => void
-    removeFromIndex: (resume: Resume) => void
-    searchIndex: (query: string, numResults: number) => Resume[]
+	addToIndex: (resume: Resume) => void
+	removeFromIndex: (resume: Resume) => void
+	searchIndex: (query: string, numResults: number) => Resume[]
 }
 
 export const SearchIndexContext = createContext<SearchIndexContextType | null>(null)
 
 export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
-    const { user, isLoading } = useUser()
-    const [index, setIndex] = useState<Fuse<Resume>>(
-        new Fuse([], {
-            keys: ['textContent'],
-            includeScore: true,
-            isCaseSensitive: false,
-            ignoreDiacritics: true,
-            ignoreLocation: true,
-        })
-    )
+	const { user, isLoading } = useUser()
+	const [index, setIndex] = useState<Fuse<Resume>>(
+		new Fuse([], {
+			keys: ['textContent'],
+			includeScore: true,
+			isCaseSensitive: false,
+			ignoreDiacritics: true,
+			ignoreLocation: true
+		})
+	)
 
-    useEffect(() => {
-        const initializeIndex = async () => {
-            if (!isLoading && user) {
-                try {
-                    const resumes = await apiClient.getResumes()
+	useEffect(() => {
+		const initializeIndex = async () => {
+			if (!isLoading && user) {
+				try {
+					const resumes = await apiClient.getResumes()
 
-                    setIndex(
-                        new Fuse(resumes, {
-                            keys: ['textContent'],
-                            includeScore: true,
-                            isCaseSensitive: false,
-                            ignoreDiacritics: true,
-                            ignoreLocation: true,
-                        })
-                    )
-                } catch (error) {
-                    console.error(error)
-                }
-            }
-        }
+					setIndex(
+						new Fuse(resumes, {
+							keys: ['textContent'],
+							includeScore: true,
+							isCaseSensitive: false,
+							ignoreDiacritics: true,
+							ignoreLocation: true
+						})
+					)
+				} catch (error) {
+					console.error(error)
+				}
+			}
+		}
 
-        initializeIndex()
-    }, [user, isLoading])
+		initializeIndex()
+	}, [user, isLoading])
 
-    /**
-     * Adds a resume to the search index
-     * @param resume - the resume to add to the search index
-     */
-    const addToIndex = useCallback(
-        (resume: Resume) => {
-            const updatedIndex = index
-            updatedIndex.add(resume)
+	/**
+	 * Adds a resume to the search index
+	 * @param resume - the resume to add to the search index
+	 */
+	const addToIndex = useCallback(
+		(resume: Resume) => {
+			const updatedIndex = index
+			updatedIndex.add(resume)
 
-            setIndex(updatedIndex)
-        },
-        [index]
-    )
+			setIndex(updatedIndex)
+		},
+		[index]
+	)
 
-    /**
-     * Removes a resume from the search index
-     * @param resume - the resume to remove from the search index
-     */
-    const removeFromIndex = useCallback(
-        (resume: Resume) => {
-            const updatedIndex = index
-            updatedIndex.remove((doc) => {
-                return doc.id === resume.id
-            })
+	/**
+	 * Removes a resume from the search index
+	 * @param resume - the resume to remove from the search index
+	 */
+	const removeFromIndex = useCallback(
+		(resume: Resume) => {
+			const updatedIndex = index
+			updatedIndex.remove((doc) => {
+				return doc.id === resume.id
+			})
 
-            setIndex(updatedIndex)
-        },
-        [index]
-    )
+			setIndex(updatedIndex)
+		},
+		[index]
+	)
 
-    /**
-     * Queries the search index and returns the results
-     * @param query - the query to search for
-     * @param numResults - the number of results to return
-     * @returns the results of the search
-     */
-    const searchIndex = useCallback(
-        (query: string, numResults: number = 5): Resume[] => {
-            //remove punctuation, symbols and brackets from the query
-            const cleanedText = query
-                .replace(/[\u2022\u2023\u25AA\u25AB\u2013\u2014\u2015•◦●|,]/g, '\n')
-                .split(/(?:\. |, |\n)/)
-                .map((line) => {
-                    return line
-                        .replace(/[\[\]{}():;]/g, '')
-                        .replace(/\s+/g, ' ')
-                        .trim()
-                })
-                .filter((line) => line.length > 0)
-                .join(' ')
+	/**
+	 * Queries the search index and returns the results
+	 * @param query - the query to search for
+	 * @param numResults - the number of results to return
+	 * @returns the results of the search
+	 */
+	const searchIndex = useCallback(
+		(query: string, numResults: number = 5): Resume[] => {
+			//remove punctuation, symbols and brackets from the query
+			const keyPhrases = query
+				.replace(/[\u2022\u2023\u25AA\u25AB\u2013\u2014\u2015•◦●|,]/g, '\n')
+				.split(/(?:\. |, |\n)/)
+				.map((line) => {
+					return line
+						.replace(/[\[\]{}():;]/g, '')
+						.replace(/\s+/g, ' ')
+						.trim()
+				})
+				.filter((line) => line.length > 0)
 
-            //remove stopwords from the query to avoid diluting the search
-            const keyWords = removeStopwords(cleanedText.split(' ')).map((word) => {
-                return { textContent: word }
-            })
+			const keyWords = removeStopwords(keyPhrases.join(' ').split(' ')).map((word) => {
+				return { textContent: word }
+			})
 
-            const results = index.search({ $or: keyWords }, { limit: numResults })
+			const results = index.search(
+				{
+					$or: [...keyWords, ...keyPhrases.map((phrase) => ({ textContent: phrase }))]
+				},
+				{ limit: numResults }
+			)
 
-            return results.map((result) => result.item)
-        },
-        [index]
-    )
+			return results.map((result) => result.item)
+		},
+		[index]
+	)
 
-    const contextValue = useMemo(
-        () => ({
-            addToIndex,
-            removeFromIndex,
-            searchIndex,
-        }),
-        [addToIndex, removeFromIndex, searchIndex]
-    )
+	const contextValue = useMemo(
+		() => ({
+			addToIndex,
+			removeFromIndex,
+			searchIndex
+		}),
+		[addToIndex, removeFromIndex, searchIndex]
+	)
 
-    return <SearchIndexContext.Provider value={contextValue}>{children}</SearchIndexContext.Provider>
+	return <SearchIndexContext.Provider value={contextValue}>{children}</SearchIndexContext.Provider>
 }

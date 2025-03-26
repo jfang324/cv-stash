@@ -8,9 +8,9 @@ A full stack web application that streamlines the process of applying for jobs b
 
 To use this application, you will need accounts for the following services:
 
--   Auth0
--   MongoDB Atlas
--   Amazon S3
+- Auth0
+- MongoDB Atlas
+- Amazon S3
 
 ### Installation
 
@@ -67,7 +67,7 @@ npm run start
 
 ## Known Issues
 
--   The app sidebar momentarily shows a login button after the user is authenticated due to cold start issues
+- The app sidebar momentarily shows a login button after the user is authenticated due to cold start issues
 
 ## Contact
 
@@ -75,10 +75,10 @@ Jeffery Fang - [jefferyfang324@gmail.com](mailto:jefferyfang324@gmail.com)
 
 ## Tools & Technologies
 
--   Next.js
--   React
--   Tailwind CSS
--   Auth0
--   MongoDB Atlas
--   Amazon S3
--   shadcn/ui
+- Next.js
+- React
+- Tailwind CSS
+- Auth0
+- MongoDB Atlas
+- Amazon S3
+- shadcn/ui

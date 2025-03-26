@@ -13,66 +13,66 @@ import Script from 'next/script'
 import './globals.css'
 
 const geistSans = Geist({
-    variable: '--font-geist-sans',
-    subsets: ['latin'],
+	variable: '--font-geist-sans',
+	subsets: ['latin']
 })
 
 const geistMono = Geist_Mono({
-    variable: '--font-geist-mono',
-    subsets: ['latin'],
+	variable: '--font-geist-mono',
+	subsets: ['latin']
 })
 
 export const metadata: Metadata = {
-    title: 'CV Stash - Manage Your Resumes & Job Applications in One Place',
-    description: 'Save hours per week tailoring resumes with CV Stash',
-    robots: 'index, follow',
+	title: 'CV Stash - Manage Your Resumes & Job Applications in One Place',
+	description: 'Save hours per week tailoring resumes with CV Stash',
+	robots: 'index, follow'
 }
 
 export const viewport: Viewport = {
-    width: 'device-width',
-    initialScale: 1.0,
+	width: 'device-width',
+	initialScale: 1.0
 }
 
 export default function RootLayout({
-    children,
+	children
 }: Readonly<{
-    children: React.ReactNode
+	children: React.ReactNode
 }>) {
-    return (
-        <html lang="en">
-            <head>
-                <Script async src="https://www.googletagmanager.com/gtag/js?id=G-RNG18ZMR27"></Script>
-                <Script id="google-analytics">
-                    {`
+	return (
+		<html lang="en">
+			<head>
+				<Script async src="https://www.googletagmanager.com/gtag/js?id=G-RNG18ZMR27"></Script>
+				<Script id="google-analytics">
+					{`
                         window.dataLayer = window.dataLayer || [];
                         function gtag(){dataLayer.push(arguments);}
                         gtag('js', new Date());
 
                         gtag('config', 'G-RNG18ZMR27');
                     `}
-                </Script>
-            </head>
-            <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <Auth0Provider>
-                    <SidebarProvider defaultOpen={false}>
-                        <UserMetadataProvider>
-                            <AppSidebar />
-                            <SidebarInset>
-                                <div className="flex flex-col w-full min-h-screen">
-                                    <Header />
-                                    <main className="flex-1">
-                                        {children}
-                                        <Toaster />
-                                    </main>
-                                    <Footer />
-                                </div>
-                            </SidebarInset>
-                        </UserMetadataProvider>
-                    </SidebarProvider>
-                </Auth0Provider>
-                <SpeedInsights />
-                <Analytics />
-            </body>
-        </html>
-    )
+				</Script>
+			</head>
+			<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+				<Auth0Provider>
+					<SidebarProvider defaultOpen={false}>
+						<UserMetadataProvider>
+							<AppSidebar />
+							<SidebarInset>
+								<div className="flex flex-col w-full min-h-screen">
+									<Header />
+									<main className="flex-1">
+										{children}
+										<Toaster />
+									</main>
+									<Footer />
+								</div>
+							</SidebarInset>
+						</UserMetadataProvider>
+					</SidebarProvider>
+				</Auth0Provider>
+				<SpeedInsights />
+				<Analytics />
+			</body>
+		</html>
+	)
 }

@@ -5,105 +5,95 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useResumes } from '@/hooks/useResumes'
 import { useSearchIndex } from '@/hooks/useSearchIndex'
-import { Resume } from '@/interfaces/Resume'
+import type { Resume } from '@/types/Resume'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function ResumesPage() {
-    const { resumes, createResume, previewResume, deleteResume, error } = useResumes()
-    const [searchQuery, setSearchQuery] = useState('')
-    const { addToIndex, removeFromIndex } = useSearchIndex()
-    const { toast } = useToast()
+	const { resumes, createResume, previewResume, deleteResume, error } = useResumes()
+	const [searchQuery, setSearchQuery] = useState('')
+	const { addToIndex, removeFromIndex } = useSearchIndex()
+	const { toast } = useToast()
 
-    useEffect(() => {
-        if (error) {
-            toast({ title: 'Error', description: error })
-        }
-    }, [error, toast])
+	useEffect(() => {
+		if (error) {
+			toast({ title: 'Error', description: error })
+		}
+	}, [error, toast])
 
-    //filter the resumes based on the search input
-    const filteredResumes = resumes.filter((resume) => {
-        const matchesSearch = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(
-            resume.name.toLowerCase()
-        )
+	//filter the resumes based on the search input
+	const filteredResumes = resumes.filter((resume) => {
+		const matchesSearch = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(
+			resume.name.toLowerCase()
+		)
 
-        return matchesSearch
-    })
+		return matchesSearch
+	})
 
-    /**
-     * Handles the upload of a resume
-     * @param file - The file to upload
-     * @param name - The name of the resume
-     * @returns The created resume or null if an error occurred
-     */
-    const handleResumeUpload = async (file: File, name: string): Promise<Resume | null> => {
-        const createdResume = await createResume(file, name)
+	/**
+	 * Callback function to update the form data after the resume is uploaded
+	 * @param resume - The uploaded resume
+	 */
+	const uploadCallback = (resume: Resume) => {
+		toast({ title: 'Success', description: 'Resume uploaded successfully' })
+		addToIndex(resume)
+	}
 
-        if (createdResume) {
-            addToIndex(createdResume)
-            toast({ title: 'Success', description: 'Resume uploaded successfully' })
+	/**
+	 * Handles the deletion of a resume
+	 * @param resume - The resume to delete
+	 * @returns
+	 */
+	const handleResumeDelete = async (resume: Resume): Promise<void> => {
+		const deletedResume = await deleteResume(resume)
 
-            return createdResume
-        }
+		if (deletedResume) {
+			removeFromIndex(deletedResume)
+			toast({ title: 'Success', description: 'Resume deleted successfully' })
+		}
+	}
 
-        return null
-    }
+	return (
+		<div className="flex flex-col h-full p-6 gap-3">
+			<div className="flex flex-col gap-1">
+				<h2 className="text-3xl font-bold tracking-tight">My Resumes</h2>
+				<p className="text-muted-foreground">Manage your resumes</p>
+			</div>
 
-    /**
-     * Handles the deletion of a resume
-     * @param resume - The resume to delete
-     * @returns
-     */
-    const handleResumeDelete = async (resume: Resume): Promise<void> => {
-        const deletedResume = await deleteResume(resume)
+			<div className="space-y-3">
+				<div className="flex gap-2">
+					<div className="flex-1 relative">
+						<Search className="h-4 text-muted-foreground w-4 -translate-y-1/2 absolute left-3 top-1/2" />
+						<Input
+							placeholder="Search resumes..."
+							className="pl-10"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+						/>
+					</div>
+					<div className="flex">
+						<ResumeUploadDialog handleResumeUpload={createResume} callBack={uploadCallback} />
+					</div>
+				</div>
 
-        if (deletedResume) {
-            removeFromIndex(deletedResume)
-            toast({ title: 'Success', description: 'Resume deleted successfully' })
-        }
-    }
+				<div className="flex justify-between items-center">
+					<p className="text-muted-foreground text-sm">
+						Showing <span className="font-medium">{resumes.length}</span> of{' '}
+						<span className="font-medium">{resumes.length}</span> resumes
+					</p>
+				</div>
 
-    return (
-        <div className="flex flex-col h-full p-6 gap-3">
-            <div className="flex flex-col gap-1">
-                <h2 className="text-3xl font-bold tracking-tight">My Resumes</h2>
-                <p className="text-muted-foreground">Manage your resumes</p>
-            </div>
-
-            <div className="space-y-3">
-                <div className="flex gap-2">
-                    <div className="flex-1 relative">
-                        <Search className="h-4 text-muted-foreground w-4 -translate-y-1/2 absolute left-3 top-1/2" />
-                        <Input
-                            placeholder="Search resumes..."
-                            className="pl-10"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex">
-                        <ResumeUploadDialog handleResumeUpload={handleResumeUpload} />
-                    </div>
-                </div>
-
-                <div className="flex justify-between items-center">
-                    <p className="text-muted-foreground text-sm">
-                        Showing <span className="font-medium">{resumes.length}</span> of{' '}
-                        <span className="font-medium">{resumes.length}</span> resumes
-                    </p>
-                </div>
-
-                <div className="flex flex-col gap-3 mt-4">
-                    {filteredResumes.map((resume) => (
-                        <ResumeCard
-                            key={resume.id}
-                            resume={resume}
-                            handlePreview={previewResume}
-                            handleDelete={handleResumeDelete}
-                        />
-                    ))}
-                </div>
-            </div>
-        </div>
-    )
+				<div className="flex flex-col gap-3 mt-4">
+					{filteredResumes.map((resume) => (
+						<ResumeCard
+							key={resume.id}
+							resume={resume}
+							handlePreview={previewResume}
+							handleDelete={handleResumeDelete}
+						/>
+					))}
+				</div>
+			</div>
+		</div>
+	)
 }
