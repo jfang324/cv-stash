@@ -57,7 +57,7 @@ resumeSchema.post('findOneAndDelete', async function (doc) {
 
 //factory function for retrieving the model
 function ResumeModel(connection: mongoose.Connection) {
-	return mongoose.models.Resume || connection.model<ResumeDocument>('Resume', resumeSchema)
+	return connection.models.Resume || connection.model<ResumeDocument>('Resume', resumeSchema)
 }
 
 //ResumeRepository implemented with mongoose

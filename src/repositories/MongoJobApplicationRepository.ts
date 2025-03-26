@@ -69,7 +69,7 @@ const jobApplicationSchema: Schema<JobApplicationDocument> = new Schema(
 //factory function for retrieving the model
 export function JobApplicationModel(connection: mongoose.Connection) {
 	return (
-		mongoose.models.JobApplication ||
+		connection.models.JobApplication ||
 		connection.model<JobApplicationDocument>('JobApplication', jobApplicationSchema)
 	)
 }

@@ -52,7 +52,7 @@ const userSchema: Schema<UserDocument> = new Schema(
 
 //factory function for retrieving the model
 function UserModel(connection: mongoose.Connection) {
-	return mongoose.models.User || connection.model<UserDocument>('User', userSchema)
+	return connection.models.User || connection.model<UserDocument>('User', userSchema)
 }
 
 //UserRepository implemented with mongoose
