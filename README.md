@@ -65,6 +65,21 @@ npm run start
 
 ## Gallery & Demonstrations
 
+<img src='https://github.com/user-attachments/assets/abfe4d75-04c4-414e-a260-7bc17a234b71'></img>
+__dashboard__
+
+<img src='https://github.com/user-attachments/assets/428374f8-9669-452e-b4e9-ef726a63913d'></img>
+__resume upload/preview__
+
+<img src='https://github.com/user-attachments/assets/85fea6fe-8643-4d0f-b2f0-39ea3066e1a0'></img>
+__resume selection__
+
+<img src='https://github.com/user-attachments/assets/9f14c121-d56e-4f50-9aae-1cc6f31d1856'></img>
+__application summary__
+
+<img src='https://github.com/user-attachments/assets/4ae833e4-d015-4cd9-b14b-76253b6a5b25'></img>
+__job application tracking__
+
 ## Known Issues
 
 - The app sidebar momentarily shows a login button after the user is authenticated due to cold start issues
