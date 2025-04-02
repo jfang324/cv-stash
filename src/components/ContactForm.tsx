@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/services/ApiClient'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -27,9 +28,23 @@ export function ContactForm() {
 		}
 	})
 
+	/**
+	 * Sends a support email to the configured email address
+	 * @param data - The form data
+	 */
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		console.log(data)
-		toast({ title: 'Success', description: 'Your message has been sent' })
+		try {
+			//TODO: uncomment this after correctly configuring SES
+			// await apiClient.sendSupportEmail(data.name, data.email, data.subject, data.message)
+			// toast({ title: 'Success', description: 'Your message has been sent' })
+
+			console.log(apiClient, data)
+			toast({ title: 'Coming Soon', description: 'We will be adding support soon' })
+			form.reset()
+		} catch (error) {
+			console.error(error)
+			toast({ title: 'Error', description: 'An error occurred while sending your message' })
+		}
 	}
 
 	return (
