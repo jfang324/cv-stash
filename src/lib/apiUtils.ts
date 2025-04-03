@@ -1,9 +1,11 @@
 import { auth0 } from '@/lib/auth0'
 import connectToDb from '@/lib/mongoConnection'
 import getS3Client from '@/lib/s3'
+import getSESClient from '@/lib/ses'
 import { MongoJobApplicationRepository } from '@/repositories/MongoJobApplicationRepository'
 import { MongoResumeRepository } from '@/repositories/MongoResumeRepository'
 import { MongoUserRepository } from '@/repositories/MongoUserRepository'
+import { EmailService } from '@/services/EmailService'
 import { JobApplicationService } from '@/services/JobApplicationService'
 import { ResumeService } from '@/services/ResumeService'
 import { UserService } from '@/services/UserService'
@@ -29,6 +31,26 @@ export const validateSessionAndGetUser = async (requiredFields: string[]) => {
 	}
 
 	return user
+}
+
+/**
+ * Validates the request body for a support email
+ * @param body - The request body object
+ * @returns The validated request body
+ */
+export const validateSupportEmailFormData = (body: {
+	name: string
+	email: string
+	subject: string
+	message: string
+}) => {
+	const { name, email, subject, message } = body
+
+	if (!name || !email || !subject || !message) {
+		throw new BadRequestError('Invalid request body', 400)
+	}
+
+	return { name, email, subject, message }
 }
 
 /**
@@ -63,6 +85,22 @@ export const getJobApplicationService = async () => {
 	const jobApplicationRepository = new MongoJobApplicationRepository(connection)
 
 	return new JobApplicationService(jobApplicationRepository)
+}
+
+/**
+ * Gets the EmailService instance
+ * @returns The EmailService instance
+ */
+export const getEmailService = async () => {
+	const sesClient = getSESClient()
+	const receiverEmail = process.env.SES_RECEIVER_EMAIL
+	const senderEmail = process.env.SES_SENDER_EMAIL
+
+	if (!receiverEmail || !senderEmail) {
+		throw new Error('AWS credentials or support email address is not set')
+	}
+
+	return new EmailService(sesClient, receiverEmail, senderEmail)
 }
 
 /**

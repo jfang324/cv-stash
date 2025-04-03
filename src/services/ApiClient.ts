@@ -131,6 +131,20 @@ export class ApiClient {
 
 		return response.data
 	}
+
+	/**
+	 * Sends a POST request to /api/support to send a support email
+	 * @param name - the name of the sender
+	 * @param email - the email address of the sender
+	 * @param subject - the subject of the email
+	 * @param message - the message body of the email
+	 * @returns the response from the server
+	 */
+	async sendSupportEmail(name: string, email: string, subject: string, message: string): Promise<void> {
+		const response = await this.httpClient.post('/api/support', { name, email, subject, message })
+
+		return response.data
+	}
 }
 
 //export a single instance to be used across the app
