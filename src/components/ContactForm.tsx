@@ -34,12 +34,8 @@ export function ContactForm() {
 	 */
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		try {
-			//TODO: uncomment this after correctly configuring SES
-			// await apiClient.sendSupportEmail(data.name, data.email, data.subject, data.message)
-			// toast({ title: 'Success', description: 'Your message has been sent' })
-
-			console.log(apiClient, data)
-			toast({ title: 'Coming Soon', description: 'We will be adding support soon' })
+			await apiClient.sendSupportEmail(data.name, data.email, data.subject, data.message)
+			toast({ title: 'Success', description: 'Your message has been sent' })
 			form.reset()
 		} catch (error) {
 			console.error(error)
