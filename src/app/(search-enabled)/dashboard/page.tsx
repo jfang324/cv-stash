@@ -1,6 +1,6 @@
 'use client'
+import { JobApplicationForm } from '@/components/forms/JobApplicationForm'
 import { FrequencyChart } from '@/components/FrequencyChart'
-import { JobApplicationForm } from '@/components/JobApplicationForm'
 import { RecentActivity } from '@/components/RecentActivity'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

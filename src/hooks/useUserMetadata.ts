@@ -1,4 +1,4 @@
-import { UserMetadataContext, UserMetadataContextType } from '@/components/UserMetadataProvider'
+import { UserMetadataContext, UserMetadataContextType } from '@/components/providers/UserMetadataProvider'
 import { useContext } from 'react'
 
 export const useUserMetadata = (): UserMetadataContextType => {

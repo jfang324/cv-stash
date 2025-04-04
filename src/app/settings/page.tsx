@@ -1,4 +1,4 @@
-import { SettingsForm } from '@/components/SettingsForm'
+import { SettingsForm } from '@/components/forms/SettingsForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 

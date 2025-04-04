@@ -1,4 +1,4 @@
-import { ContactForm } from '@/components/ContactForm'
+import { ContactForm } from '@/components/forms/ContactForm'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
