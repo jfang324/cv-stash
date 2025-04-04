@@ -1,5 +1,5 @@
 'use client'
-import { SearchIndexProvider } from '@/components/SearchIndexProvider'
+import { SearchIndexProvider } from '@/components/providers/SearchIndexProvider'
 import { useEffect } from 'react'
 import { pdfjs } from 'react-pdf'
 

@@ -47,12 +47,12 @@ export function ContactForm() {
 		<div className="border p-6 rounded-lg max-w-3xl mx-auto">
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-					<div className="flex flex-row flex-wrap justify-between w-full gap-3">
+					<div className="flex flex-col sm:flex-row  justify-between w-full gap-3">
 						<FormField
 							control={form.control}
 							name="name"
 							render={({ field }) => (
-								<FormItem className="flex-1 min-w-[300px] space-y-0.5">
+								<FormItem className="flex-1 space-y-0.5">
 									<FormLabel className="font-semibold">Name</FormLabel>
 									<FormControl>
 										<Input placeholder="John Doe" {...field} />
@@ -65,7 +65,7 @@ export function ContactForm() {
 							control={form.control}
 							name="email"
 							render={({ field }) => (
-								<FormItem className="flex-1 min-w-[300px] space-y-0.5">
+								<FormItem className="flex-1 space-y-0.5">
 									<FormLabel className="font-semibold">Email</FormLabel>
 									<FormControl>
 										<Input placeholder="John.Doe@example.com" {...field} />
