@@ -2,6 +2,7 @@
 import { apiClient } from '@/services/ApiClient'
 import type { Resume } from '@/types/Resume'
 import { useUser } from '@auth0/nextjs-auth0'
+import { useQuery } from '@tanstack/react-query'
 import Fuse from 'fuse.js'
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { removeStopwords } from 'stopword'
@@ -11,15 +12,27 @@ interface SearchIndexProviderProps {
 }
 
 export interface SearchIndexContextType {
-	addToIndex: (resume: Resume) => void
-	removeFromIndex: (resume: Resume) => void
+	isLoading: boolean
+	error: Error | null
 	searchIndex: (query: string, numResults: number) => Resume[]
 }
 
 export const SearchIndexContext = createContext<SearchIndexContextType | null>(null)
 
 export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
-	const { user, isLoading } = useUser()
+	const { user, isLoading: authLoading } = useUser()
+
+	const {
+		data: resumes,
+		isLoading: queryLoading,
+		error: queryError
+	} = useQuery({
+		queryKey: ['resumes', user?.sub],
+		queryFn: () => apiClient.getResumes(),
+		staleTime: 60 * 1000,
+		placeholderData: []
+	})
+
 	const [index, setIndex] = useState<Fuse<Resume>>(
 		new Fuse([], {
 			keys: ['textContent'],
@@ -30,59 +43,21 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
 		})
 	)
 
+	const isLoading = authLoading || queryLoading
+
 	useEffect(() => {
-		const initializeIndex = async () => {
-			if (!isLoading && user) {
-				try {
-					const resumes = await apiClient.getResumes()
-
-					setIndex(
-						new Fuse(resumes, {
-							keys: ['textContent'],
-							includeScore: true,
-							isCaseSensitive: false,
-							ignoreDiacritics: true,
-							ignoreLocation: true
-						})
-					)
-				} catch (error) {
-					console.error(error)
-				}
-			}
+		if (!isLoading && user) {
+			setIndex(
+				new Fuse(resumes || [], {
+					keys: ['textContent'],
+					includeScore: true,
+					isCaseSensitive: false,
+					ignoreDiacritics: true,
+					ignoreLocation: true
+				})
+			)
 		}
-
-		initializeIndex()
-	}, [user, isLoading])
-
-	/**
-	 * Adds a resume to the search index
-	 * @param resume - the resume to add to the search index
-	 */
-	const addToIndex = useCallback(
-		(resume: Resume) => {
-			const updatedIndex = index
-			updatedIndex.add(resume)
-
-			setIndex(updatedIndex)
-		},
-		[index]
-	)
-
-	/**
-	 * Removes a resume from the search index
-	 * @param resume - the resume to remove from the search index
-	 */
-	const removeFromIndex = useCallback(
-		(resume: Resume) => {
-			const updatedIndex = index
-			updatedIndex.remove((doc) => {
-				return doc.id === resume.id
-			})
-
-			setIndex(updatedIndex)
-		},
-		[index]
-	)
+	}, [user, isLoading, resumes])
 
 	/**
 	 * Queries the search index and returns the results
@@ -122,11 +97,11 @@ export const SearchIndexProvider = ({ children }: SearchIndexProviderProps) => {
 
 	const contextValue = useMemo(
 		() => ({
-			addToIndex,
-			removeFromIndex,
+			isLoading,
+			error: queryError,
 			searchIndex
 		}),
-		[addToIndex, removeFromIndex, searchIndex]
+		[isLoading, queryError, searchIndex]
 	)
 
 	return <SearchIndexContext.Provider value={contextValue}>{children}</SearchIndexContext.Provider>

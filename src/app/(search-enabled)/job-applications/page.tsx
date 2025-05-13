@@ -12,7 +12,8 @@ import { Briefcase, FileText, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function JobApplicationsPage() {
-	const { jobApplications, updateJobApplication, deleteJobApplication, error } = useJobApplications()
+	const { jobApplications, error, pendingApplication, updateJobApplication, deleteJobApplication } =
+		useJobApplications()
 	const [selectedStatus, setSelectedStatus] = useState<JobApplication['status'] | 'All'>('All')
 	const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null)
 	const [showDetailsDialog, setShowDetailsDialog] = useState(false)
@@ -21,16 +22,18 @@ export default function JobApplicationsPage() {
 
 	useEffect(() => {
 		if (error) {
-			toast({ title: 'Error', description: error })
+			console.error(error)
+
+			toast({ title: 'Error', description: 'Something went wrong, please try again' })
 		}
 	}, [error, toast])
 
 	const allStatuses: (JobApplication['status'] | 'All')[] = [
 		'All',
-		...new Set(jobApplications.map((app) => app.status))
+		...new Set(jobApplications?.map((app) => app.status))
 	]
 
-	const filteredJobApplications = jobApplications.filter((application) => {
+	const filteredJobApplications = jobApplications?.filter((application) => {
 		const searchRegex = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 
 		const jobTitleMatchesSearch = searchRegex.test(application.jobTitle.toLowerCase())
@@ -105,16 +108,17 @@ export default function JobApplicationsPage() {
 
 				<div className="flex justify-between items-center">
 					<p className="text-muted-foreground text-sm">
-						Showing <span className="font-medium">{jobApplications.length}</span> of{' '}
-						<span className="font-medium">{jobApplications.length}</span> job applications
+						Showing <span className="font-medium">{jobApplications?.length}</span> of{' '}
+						<span className="font-medium">{jobApplications?.length}</span> job applications
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-3 mt-4">
-					{filteredJobApplications.map((application) => (
+					{filteredJobApplications?.map((application) => (
 						<JobApplicationCard
 							key={application.id}
 							jobApplication={application}
+							pending={pendingApplication?.id === application.id}
 							handlePreview={handlePreview}
 							handleDelete={deleteJobApplication}
 							handleUpdate={updateJobApplication}

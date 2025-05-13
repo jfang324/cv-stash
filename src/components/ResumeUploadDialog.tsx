@@ -19,7 +19,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
 interface ResumeUploadDialogProps {
-	handleResumeUpload: (file: File, name: string) => Promise<Resume | null>
+	handleResumeUpload: (file: File, name: string) => Promise<Resume | undefined>
 	callBack?: (resume: Resume) => void
 }
 

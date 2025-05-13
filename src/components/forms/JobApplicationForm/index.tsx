@@ -12,8 +12,8 @@ import { Briefcase, CheckCircle, ChevronLeft, ChevronRight, FileText } from 'luc
 import { useState } from 'react'
 
 interface JobApplicationFormProps {
-	createJobApplication: (formData: JobApplicationFormFields) => Promise<JobApplication | null>
-	createResume: (file: File, name: string) => Promise<Resume | null>
+	createJobApplication: (formData: JobApplicationFormFields) => Promise<JobApplication | undefined>
+	createResume: (file: File, name: string) => Promise<Resume | undefined>
 }
 
 export const JobApplicationForm = ({ createJobApplication, createResume }: JobApplicationFormProps) => {

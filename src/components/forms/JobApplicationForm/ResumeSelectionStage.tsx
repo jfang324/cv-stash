@@ -13,12 +13,12 @@ import { useEffect, useState } from 'react'
 interface ResumeSelectionStageProps {
 	formData: JobApplicationFormFields
 	handleResumeSelect: (selectedResume: Resume) => void
-	createResume: (file: File, name: string) => Promise<Resume | null>
+	createResume: (file: File, name: string) => Promise<Resume | undefined>
 }
 
 export const ResumeSelectionStage = ({ formData, handleResumeSelect, createResume }: ResumeSelectionStageProps) => {
 	const [resumes, setResumes] = useState<Resume[]>([])
-	const { searchIndex, addToIndex } = useSearchIndex()
+	const { searchIndex } = useSearchIndex()
 	const { toast } = useToast()
 
 	useEffect(() => {
@@ -59,7 +59,6 @@ export const ResumeSelectionStage = ({ formData, handleResumeSelect, createResum
 		handleResumeSelect(resume)
 
 		setResumes((prev) => [...prev, resume])
-		addToIndex(resume)
 	}
 
 	return (

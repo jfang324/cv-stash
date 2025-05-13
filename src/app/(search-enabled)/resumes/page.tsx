@@ -4,25 +4,25 @@ import { ResumeUploadDialog } from '@/components/ResumeUploadDialog'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useResumes } from '@/hooks/useResumes'
-import { useSearchIndex } from '@/hooks/useSearchIndex'
 import type { Resume } from '@/types/Resume'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function ResumesPage() {
-	const { resumes, createResume, previewResume, deleteResume, error } = useResumes()
+	const { resumes, error, pendingResume, createResume, previewResume, deleteResume } = useResumes()
 	const [searchQuery, setSearchQuery] = useState('')
-	const { addToIndex, removeFromIndex } = useSearchIndex()
 	const { toast } = useToast()
 
 	useEffect(() => {
 		if (error) {
-			toast({ title: 'Error', description: error })
+			console.error(error)
+
+			toast({ title: 'Error', description: 'Something went wrong, please try again' })
 		}
 	}, [error, toast])
 
 	//filter the resumes based on the search input
-	const filteredResumes = resumes.filter((resume) => {
+	const filteredResumes = resumes?.filter((resume) => {
 		const matchesSearch = new RegExp(searchQuery.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(
 			resume.name.toLowerCase()
 		)
@@ -35,8 +35,9 @@ export default function ResumesPage() {
 	 * @param resume - The uploaded resume
 	 */
 	const uploadCallback = (resume: Resume) => {
-		toast({ title: 'Success', description: 'Resume uploaded successfully' })
-		addToIndex(resume)
+		if (resume) {
+			toast({ title: 'Success', description: 'Resume uploaded successfully' })
+		}
 	}
 
 	/**
@@ -48,7 +49,6 @@ export default function ResumesPage() {
 		const deletedResume = await deleteResume(resume)
 
 		if (deletedResume) {
-			removeFromIndex(deletedResume)
 			toast({ title: 'Success', description: 'Resume deleted successfully' })
 		}
 	}
@@ -78,16 +78,17 @@ export default function ResumesPage() {
 
 				<div className="flex justify-between items-center">
 					<p className="text-muted-foreground text-sm">
-						Showing <span className="font-medium">{resumes.length}</span> of{' '}
-						<span className="font-medium">{resumes.length}</span> resumes
+						Showing <span className="font-medium">{resumes?.length}</span> of{' '}
+						<span className="font-medium">{resumes?.length}</span> resumes
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-3 mt-4">
-					{filteredResumes.map((resume) => (
+					{filteredResumes?.map((resume) => (
 						<ResumeCard
 							key={resume.id}
 							resume={resume}
+							pending={pendingResume?.id === resume.id}
 							handlePreview={previewResume}
 							handleDelete={handleResumeDelete}
 						/>

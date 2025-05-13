@@ -8,6 +8,7 @@ import { Briefcase, Eye, Pencil, Trash } from 'lucide-react'
 
 interface JobApplicationCardProps {
 	jobApplication: JobApplication
+	pending?: boolean
 	handlePreview: (application: JobApplication) => void
 	handleDelete: (application: JobApplication) => void
 	handleUpdate: (application: JobApplication) => void
@@ -15,6 +16,7 @@ interface JobApplicationCardProps {
 
 export const JobApplicationCard = ({
 	jobApplication,
+	pending,
 	handlePreview,
 	handleDelete,
 	handleUpdate
@@ -40,7 +42,7 @@ export const JobApplicationCard = ({
 	}
 
 	return (
-		<Card>
+		<Card className={pending ? 'opacity-50 cursor-not-allowed' : ''}>
 			<CardHeader>
 				<div className="flex flex-col gap-2">
 					<div className="flex flex-1 flex-row justify-between gap-4">
@@ -71,6 +73,7 @@ export const JobApplicationCard = ({
 											size={'icon'}
 											className="h-8 w-8"
 											onClick={() => handlePreview(jobApplication)}
+											disabled={pending ? true : false}
 										>
 											<Eye className="h-4 w-4" />
 										</Button>
@@ -92,9 +95,17 @@ export const JobApplicationCard = ({
 											}
 										>
 											{/* Hack to make the select trigger look like a pencil icon */}
-											<Button variant={'outline'} size={'icon'} className="h-8 w-8" asChild>
+											<Button
+												variant={'outline'}
+												size={'icon'}
+												className={`h-8 w-8 ${pending ? 'text-muted-foreground border-muted pointer-events-none' : ''}`}
+												asChild
+											>
 												<div className="hover:cursor-pointer">
-													<SelectTrigger className="h-8 text-background w-8 absolute focus:ring-0" />
+													<SelectTrigger
+														className="h-8 text-background w-8 absolute focus:ring-0"
+														disabled={pending ? true : false}
+													/>
 													<Pencil className="h-4 w-4" />
 												</div>
 											</Button>
@@ -130,6 +141,7 @@ export const JobApplicationCard = ({
 											size={'icon'}
 											className="h-8 w-8 hover:text-destructive"
 											onClick={() => handleDelete(jobApplication)}
+											disabled={pending ? true : false}
 										>
 											<Trash className="h-4 w-4" />
 										</Button>
