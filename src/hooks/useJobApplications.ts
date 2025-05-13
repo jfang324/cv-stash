@@ -1,98 +1,138 @@
-'use client'
 import { apiClient } from '@/services/ApiClient'
 import type { JobApplication } from '@/types/JobApplication'
 import type { JobApplicationFormFields } from '@/types/JobApplicationFormFields'
-import { useEffect, useState } from 'react'
+import { useUser } from '@auth0/nextjs-auth0'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
-export const useJobApplications = () => {
-	const [jobApplications, setJobApplications] = useState<JobApplication[]>([])
-	const [error, setError] = useState<string | null>(null)
+export function useJobApplications() {
+	const { user } = useUser()
 
-	useEffect(() => {
-		const fetchJobApplications = async () => {
-			try {
-				const fetchedJobApplications = await apiClient.getJobApplications()
+	const {
+		data: jobApplications,
+		isLoading: queryLoading,
+		error: queryError
+	} = useQuery({
+		queryKey: ['job-applications', user?.sub],
+		queryFn: () => apiClient.getJobApplications(),
+		staleTime: 60 * 1000,
+		placeholderData: []
+	})
 
-				setJobApplications(fetchedJobApplications.sort((a, b) => b.dateApplied - a.dateApplied))
-			} catch (error) {
-				console.error(error)
-				setError('Failed to retrieve job applications')
-			}
+	const queryClient = useQueryClient()
+
+	const {
+		mutateAsync: createApplicationMutation,
+		isPending: createMutationLoading,
+		error: createMutationError
+	} = useMutation({
+		mutationFn: (formData: JobApplicationFormFields) => apiClient.createJobApplication(formData),
+		onSuccess: (createdJobApplication) => {
+			queryClient.setQueryData(
+				['job-applications', user?.sub],
+				[...(jobApplications || []), createdJobApplication]
+			)
 		}
-
-		fetchJobApplications()
-	}, [])
+	})
 
 	/**
 	 * Creates a new job application and updates the state
 	 * @param formData - the form data of the job application to create
-	 * @returns the created job application or null if an error occurred
+	 * @returns the created job application
 	 */
-	const createJobApplication = async (formData: JobApplicationFormFields): Promise<JobApplication | null> => {
-		try {
-			const createdJobApplication = await apiClient.createJobApplication(formData)
+	const createJobApplication = useCallback(
+		async (formData: JobApplicationFormFields): Promise<JobApplication | undefined> => {
+			try {
+				const createdJobApplication = await createApplicationMutation(formData)
 
-			setJobApplications([...jobApplications, createdJobApplication])
-			setError(null)
+				return createdJobApplication
+			} catch (error) {
+				console.error(error)
+			}
+		},
+		[createApplicationMutation]
+	)
 
-			return createdJobApplication
-		} catch (error) {
-			console.error(error)
-			setError('Failed to create job application')
-
-			return null
+	const {
+		mutateAsync: updateApplicationMutation,
+		isPending: updateMutationLoading,
+		error: updateMutationError,
+		variables: updatingApplication
+	} = useMutation({
+		mutationFn: (jobApplication: JobApplication) => apiClient.updateJobApplication(jobApplication),
+		onSuccess: (updatedJobApplication) => {
+			queryClient.setQueryData(
+				['job-applications', user?.sub],
+				(jobApplications || []).map((app) =>
+					app.id === updatedJobApplication.id ? updatedJobApplication : app
+				)
+			)
 		}
-	}
+	})
 
 	/**
 	 * Updates a job application and updates the state
 	 * @param jobApplication - the job application to update
-	 * @returns the updated job application or null if an error occurred
+	 * @returns the updated job application
 	 */
-	const updateJobApplication = async (jobApplication: JobApplication): Promise<JobApplication | null> => {
-		try {
-			const updatedJobApplication = await apiClient.updateJobApplication(jobApplication)
+	const updateJobApplication = useCallback(
+		async (jobApplication: JobApplication): Promise<JobApplication | undefined> => {
+			try {
+				const updatedJobApplication = await updateApplicationMutation(jobApplication)
 
-			setJobApplications(
-				jobApplications.map((app) => (app.id === updatedJobApplication.id ? updatedJobApplication : app))
+				return updatedJobApplication
+			} catch (error) {
+				console.error(error)
+			}
+		},
+		[updateApplicationMutation]
+	)
+
+	const {
+		mutateAsync: deleteApplicationMutation,
+		isPending: deleteMutationLoading,
+		error: deleteMutationError,
+		variables: deletingApplication
+	} = useMutation({
+		mutationFn: (jobApplication: JobApplication) => apiClient.deleteJobApplication(jobApplication),
+		onSuccess: (deletedJobApplication) => {
+			queryClient.setQueryData(
+				['job-applications', user?.sub],
+				(jobApplications || []).filter((app) => app.id !== deletedJobApplication.id)
 			)
-			setError(null)
-
-			return updatedJobApplication
-		} catch (error) {
-			console.error(error)
-			setError('Failed to update job application')
-
-			return null
 		}
-	}
+	})
 
 	/**
 	 * Deletes a job application and updates the state
 	 * @param jobApplication - the job application to delete
-	 * @returns the deleted job application or null if an error occurred
+	 * @returns the deleted job application
 	 */
-	const deleteJobApplication = async (jobApplication: JobApplication): Promise<JobApplication | null> => {
-		try {
-			const deletedJobApplication = await apiClient.deleteJobApplication(jobApplication)
+	const deleteJobApplication = useCallback(
+		async (jobApplication: JobApplication): Promise<JobApplication | undefined> => {
+			try {
+				const deletedJobApplication = await deleteApplicationMutation(jobApplication)
 
-			setJobApplications(jobApplications.filter((app) => app.id !== deletedJobApplication.id))
-			setError(null)
+				return deletedJobApplication
+			} catch (error) {
+				console.error(error)
+			}
+		},
+		[deleteApplicationMutation]
+	)
 
-			return deletedJobApplication
-		} catch (error) {
-			console.error(error)
-			setError('Failed to delete job application')
-
-			return null
-		}
-	}
+	// centralized loading and error states
+	const isLoading = queryLoading || createMutationLoading || updateMutationLoading || deleteMutationLoading
+	const error = queryError || createMutationError || updateMutationError || deleteMutationError
+	const pendingApplication = isLoading ? updatingApplication || deletingApplication : undefined
 
 	return {
 		jobApplications,
+		isLoading,
+		error,
+		pendingApplication,
 		createJobApplication,
 		updateJobApplication,
-		deleteJobApplication,
-		error
+		deleteJobApplication
 	}
 }

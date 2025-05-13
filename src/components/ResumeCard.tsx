@@ -5,13 +5,14 @@ import { Eye, FileText, Trash } from 'lucide-react'
 
 interface ResumeCardProps {
 	resume: Resume
+	pending?: boolean
 	handlePreview: (resume: Resume) => void
 	handleDelete: (resume: Resume) => void
 }
 
-export const ResumeCard = ({ resume, handlePreview, handleDelete }: ResumeCardProps) => {
+export const ResumeCard = ({ resume, pending, handlePreview, handleDelete }: ResumeCardProps) => {
 	return (
-		<Card>
+		<Card className={pending ? 'opacity-50 cursor-not-allowed' : ''}>
 			<CardHeader className="pb-2">
 				<div className="flex flex-wrap justify-between gap-2">
 					<div className="space-y-2">
@@ -30,6 +31,7 @@ export const ResumeCard = ({ resume, handlePreview, handleDelete }: ResumeCardPr
 							size="sm"
 							className="text-muted-foreground hover:text-foreground"
 							onClick={() => handlePreview(resume)}
+							disabled={pending ? true : false}
 						>
 							<Eye className="h-4 w-4 mr-1" />
 							Preview
@@ -39,6 +41,7 @@ export const ResumeCard = ({ resume, handlePreview, handleDelete }: ResumeCardPr
 							size="sm"
 							className="text-muted-foreground hover:text-destructive"
 							onClick={() => handleDelete(resume)}
+							disabled={pending ? true : false}
 						>
 							<Trash className="h-4 w-4 mr-1" />
 							Delete

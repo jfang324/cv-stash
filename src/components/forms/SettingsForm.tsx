@@ -17,7 +17,7 @@ const formSchema = z.object({
 })
 
 export const SettingsForm = () => {
-	const { user, updateUserMetadata } = useUserMetadata()
+	const { user, isLoading, error, updateUserMetadata } = useUserMetadata()
 	const { toast } = useToast()
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -38,8 +38,20 @@ export const SettingsForm = () => {
 		}
 	}, [form, user])
 
+	useEffect(() => {
+		if (error) {
+			console.error(error)
+
+			toast({
+				title: 'Error',
+				description: 'Something went wrong, please try again'
+			})
+		}
+	}, [error, toast])
+
 	/**
 	 * Handles form submission
+	 * @param data - Form data
 	 */
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		const response = await updateUserMetadata(data)
@@ -48,11 +60,6 @@ export const SettingsForm = () => {
 			toast({
 				title: 'Success',
 				description: 'Your account details have been updated'
-			})
-		} else {
-			toast({
-				title: 'Error',
-				description: 'There was an error updating your account details'
 			})
 		}
 	}
@@ -73,7 +80,7 @@ export const SettingsForm = () => {
 								<FormItem className="space-y-0.5">
 									<FormLabel className="font-semibold">First Name</FormLabel>
 									<FormControl>
-										<Input placeholder="John" {...field} />
+										<Input placeholder="John" {...field} disabled={isLoading} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -86,7 +93,7 @@ export const SettingsForm = () => {
 								<FormItem className="space-y-0.5">
 									<FormLabel className="font-semibold">Last Name</FormLabel>
 									<FormControl>
-										<Input placeholder="Doe" {...field} />
+										<Input placeholder="Doe" {...field} disabled={isLoading} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -99,7 +106,11 @@ export const SettingsForm = () => {
 								<FormItem className="space-y-0.5">
 									<FormLabel className="font-semibold">Profile Picture</FormLabel>
 									<FormControl>
-										<Input placeholder="https://example.com/profile-picture.jpg" {...field} />
+										<Input
+											placeholder="https://example.com/profile-picture.jpg"
+											{...field}
+											disabled={isLoading}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -107,7 +118,9 @@ export const SettingsForm = () => {
 						/>
 
 						<div className="flex justify-end pt-2">
-							<Button type="submit">Save Changes</Button>
+							<Button type="submit" disabled={isLoading}>
+								Save Changes
+							</Button>
 						</div>
 					</form>
 				</Form>

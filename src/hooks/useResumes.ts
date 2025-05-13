@@ -1,27 +1,36 @@
-'use client'
 import { parsePdf } from '@/lib/utils'
 import { apiClient } from '@/services/ApiClient'
 import type { Resume } from '@/types/Resume'
-import { useEffect, useState } from 'react'
+import { useUser } from '@auth0/nextjs-auth0'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const useResumes = () => {
-	const [resumes, setResumes] = useState<Resume[]>([])
-	const [error, setError] = useState<string | null>(null)
+export function useResumes() {
+	const { user } = useUser()
 
-	useEffect(() => {
-		const fetchResumes = async () => {
-			try {
-				const fetchedResumes = await apiClient.getResumes()
+	const {
+		data: resumes,
+		isLoading: queryLoading,
+		error: queryError
+	} = useQuery({
+		queryKey: ['resumes', user?.sub],
+		queryFn: () => apiClient.getResumes(),
+		staleTime: 60 * 1000,
+		placeholderData: []
+	})
 
-				setResumes(fetchedResumes.sort((a, b) => b.lastModified - a.lastModified))
-			} catch (error) {
-				console.error(error)
-				setError('Failed to retrieve resumes')
-			}
+	const queryClient = useQueryClient()
+
+	const {
+		mutateAsync: createResumeMutation,
+		isPending: createMutationLoading,
+		error: createMutationError
+	} = useMutation({
+		mutationFn: (variables: { file: File; name: string; textContent: string }) =>
+			apiClient.createResume(variables.file, variables.name, variables.textContent),
+		onSuccess: (createdResume) => {
+			queryClient.setQueryData(['resumes', user?.sub], [...(resumes || []), createdResume])
 		}
-
-		fetchResumes()
-	}, [])
+	})
 
 	/**
 	 * Creates a new resume and updates the state
@@ -29,20 +38,14 @@ export const useResumes = () => {
 	 * @param name - the name of the resume
 	 * @returns the created resume or null if an error occurred
 	 */
-	const createResume = async (file: File, name: string): Promise<Resume | null> => {
+	const createResume = async (file: File, name: string): Promise<Resume | undefined> => {
 		try {
 			const textContent = await parsePdf(file)
-			const createdResume = await apiClient.createResume(file, name, textContent)
-
-			setResumes([...resumes, createdResume])
-			setError(null)
+			const createdResume = await createResumeMutation({ file, name, textContent })
 
 			return createdResume
 		} catch (error) {
 			console.error(error)
-			setError('Failed to create resume')
-
-			return null
 		}
 	}
 
@@ -55,34 +58,47 @@ export const useResumes = () => {
 		try {
 			const url = await apiClient.getPresignedUrl(resume)
 
-			setError(null)
 			window.open(url, '_blank')
 		} catch (error) {
 			console.error(error)
-			setError('Failed to retrieve presigned url')
 		}
 	}
+
+	const {
+		mutateAsync: deleteResumeMutation,
+		isPending: deleteMutationLoading,
+		error: deleteMutationError,
+		variables: deletingResume
+	} = useMutation({
+		mutationFn: (resume: Resume) => apiClient.deleteResume(resume),
+		onSuccess: (deletedResume) => {
+			queryClient.setQueryData(
+				['resumes', user?.sub],
+				(resumes || []).filter((r) => r.id !== deletedResume.id)
+			)
+			queryClient.invalidateQueries({ queryKey: ['job-applications', user?.sub], exact: true })
+		}
+	})
 
 	/**
 	 * Deletes a resume and updates the state
 	 * @param resume - the resume to delete
 	 * @returns the deleted resume or null if an error occurred
 	 */
-	const deleteResume = async (resume: Resume): Promise<Resume | null> => {
+	const deleteResume = async (resume: Resume): Promise<Resume | undefined> => {
 		try {
-			const deletedResume = await apiClient.deleteResume(resume)
-
-			setResumes(resumes.filter((r) => r.id !== deletedResume.id))
-			setError(null)
+			const deletedResume = await deleteResumeMutation(resume)
 
 			return deletedResume
 		} catch (error) {
 			console.error(error)
-			setError('Failed to delete resume')
-
-			return null
 		}
 	}
 
-	return { resumes, createResume, previewResume, deleteResume, error }
+	// centralized loading and error states
+	const isLoading = queryLoading || createMutationLoading || deleteMutationLoading
+	const error = queryError || createMutationError || deleteMutationError
+	const pendingResume = isLoading ? deletingResume : undefined
+
+	return { resumes, isLoading, error, pendingResume, createResume, previewResume, deleteResume }
 }

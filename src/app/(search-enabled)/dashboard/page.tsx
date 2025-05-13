@@ -17,7 +17,9 @@ export default function DashboardPage() {
 
 	useEffect(() => {
 		if (resumeError || jobApplicationError) {
-			toast({ title: 'Error', description: resumeError || jobApplicationError })
+			console.error(resumeError || jobApplicationError)
+
+			toast({ title: 'Error', description: 'Something went wrong, please try again' })
 		}
 	}, [resumeError, jobApplicationError, toast])
 
@@ -36,8 +38,11 @@ export default function DashboardPage() {
 
 				<TabsContent value="overview" className="space-y-4">
 					<div className="flex flex-wrap gap-4">
-						<FrequencyChart data={calculateResumeUploadFrequency(resumes)} dataType="resumes" />
-						<FrequencyChart data={calculateApplicationFrequency(jobApplications)} dataType="applications" />
+						<FrequencyChart data={calculateResumeUploadFrequency(resumes || [])} dataType="resumes" />
+						<FrequencyChart
+							data={calculateApplicationFrequency(jobApplications || [])}
+							dataType="applications"
+						/>
 					</div>
 
 					<Card>
@@ -46,7 +51,7 @@ export default function DashboardPage() {
 							<CardDescription>Your recent resume uploads and job applications</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							{calculateRecentActivity(jobApplications, resumes).map((item) => (
+							{calculateRecentActivity(jobApplications || [], resumes || []).map((item) => (
 								<RecentActivity item={item} key={item.id} />
 							))}
 						</CardContent>
